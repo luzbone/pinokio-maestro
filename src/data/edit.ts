@@ -1,0 +1,42 @@
+export const EDIT_TOOLS = [
+  {
+    id: "retake",
+    name: "Retake",
+    blurb: "Re-roll a section of an existing video with a new prompt. Timing and surrounding frames stay; the beat you hated gets another performance.",
+    when: "A line, a glance, or a two-second stumble inside an otherwise good take.",
+    cost: "One short generate, not a full clip. Still occupies the video GPU — unload the LLM.",
+    typical: false,
+  },
+  {
+    id: "edit-anything",
+    name: "Edit Anything",
+    blurb: "Add, remove, or change elements in a finished clip with text and in-context LoRA models. The rest of the shot tries to hold still.",
+    when: "A prop, a sign, a small wardrobe miss. Not a new performance.",
+    cost: "Moderate. In-context LoRAs add VRAM. Optional SAM 3.1 inpaint support is a separate Pinokio install.",
+    typical: false,
+  },
+  {
+    id: "outpaint",
+    name: "Outpaint",
+    blurb: "Extend the frame in any direction while keeping original action, timing, and audio.",
+    when: "You shot 4:3 and need 16:9, or the head is too tight for a title card.",
+    cost: "Cheaper than regenerating the take. Audio is preserved; do not stack a new Music3 pass on top.",
+    typical: false,
+  },
+  {
+    id: "repaint",
+    name: "Repaint",
+    blurb: "SCAIL-2 restyle of characters, objects, or the whole scene while the source motion and camera are retained.",
+    when: "The blocking is right and the world is wrong — day for night, wardrobe, set dressing.",
+    cost: "Heavy relative to Retake. Treat it like a full generate for VRAM.",
+    typical: false,
+  },
+  {
+    id: "recast",
+    name: "Recast",
+    blurb: "SCAIL-2 mapping of one or more people onto replacement characters, including multi-shot scenes and group shots.",
+    when: "The acting and camera are keepers; the face or body must change across the cut.",
+    cost: "Heaviest Edit tool. Group shots multiply identity work. Not a 6 GB job.",
+    typical: false,
+  },
+] as const;
