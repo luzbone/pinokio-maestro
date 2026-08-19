@@ -11,7 +11,7 @@ export function AuthSlot() {
   return (
     <Link
       to="/login"
-      className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted hover:text-gold"
+      className="font-mono text-xs uppercase tracking-[0.16em] text-muted hover:text-gold"
     >
       Sign in
     </Link>

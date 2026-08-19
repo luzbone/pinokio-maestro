@@ -20,7 +20,7 @@ export const Route = createRootRoute({
           "Interactive studio console for Maestro v1.8.7.1 — models, every control, and hardware-aware settings.",
       },
       { name: "apple-mobile-web-app-title", content: APP_NAME },
-      { name: "theme-color", content: "#0a0806" },
+      { name: "theme-color", content: "#1A1612" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: APP_NAME },
       { property: "og:type", content: "website" },
@@ -60,9 +60,9 @@ export const Route = createRootRoute({
           position="bottom-right"
           toastOptions={{
             style: {
-              background: "#16110c",
-              border: "1px solid #3a2e20",
-              color: "#f3ead9",
+              background: "#2A241C",
+              border: "1px solid rgba(232,196,140,0.28)",
+              color: "#F4EFE6",
             },
           }}
         />

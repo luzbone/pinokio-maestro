@@ -34,10 +34,10 @@ export function HardwareAdvisor() {
 
   const panel =
     result.status === "comfortable"
-      ? "border-safe/40 bg-safe/5"
+      ? "border-safe/70 bg-safe-bg"
       : result.status === "tight"
-        ? "border-warn/40 bg-warn/5"
-        : "border-crash/40 bg-crash/5";
+        ? "border-warn/70 bg-warn-bg"
+        : "border-crash/70 bg-pro-bg";
 
   return (
     <section id="hardware" className="scroll-mt-24 border-t border-border px-5 py-16 md:px-8">
@@ -50,11 +50,11 @@ export function HardwareAdvisor() {
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
           <form
-            className="bezel space-y-5 rounded-xl border border-border bg-surface p-5"
+            className="bezel space-y-5 rounded-xl border border-border bg-surface p-6"
             onSubmit={(e) => e.preventDefault()}
           >
             <fieldset>
-              <legend className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+              <legend className="font-mono text-xs uppercase tracking-[0.16em] text-gold">
                 VRAM
               </legend>
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -70,7 +70,7 @@ export function HardwareAdvisor() {
               </div>
             </fieldset>
             <fieldset>
-              <legend className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+              <legend className="font-mono text-xs uppercase tracking-[0.16em] text-gold">
                 System RAM
               </legend>
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -86,7 +86,7 @@ export function HardwareAdvisor() {
               </div>
             </fieldset>
             <fieldset>
-              <legend className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+              <legend className="font-mono text-xs uppercase tracking-[0.16em] text-gold">
                 GPU family
               </legend>
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -100,10 +100,10 @@ export function HardwareAdvisor() {
                   </Pick>
                 ))}
               </div>
-              <p className="mt-2 text-xs text-subtle">Sol Engine is RTX 40 / 50 only.</p>
+              <p className="mt-2 text-xs text-muted">Sol Engine is RTX 40 / 50 only.</p>
             </fieldset>
             <fieldset>
-              <legend className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+              <legend className="font-mono text-xs uppercase tracking-[0.16em] text-gold">
                 Goal
               </legend>
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -119,7 +119,7 @@ export function HardwareAdvisor() {
               </div>
             </fieldset>
             <fieldset>
-              <legend className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+              <legend className="font-mono text-xs uppercase tracking-[0.16em] text-gold">
                 Bias
               </legend>
               <div className="mt-2 flex flex-wrap gap-1.5">
@@ -143,14 +143,14 @@ export function HardwareAdvisor() {
               />
               <span>
                 <span className="text-fg">Director + local LLM will also be running.</span>
-                <span className="mt-1 block text-xs text-subtle">
+                <span className="mt-1 block text-xs text-muted">
                   Gemma 4 4B unloads after 60 s idle. Planning still occupies the GPU.
                 </span>
               </span>
             </label>
           </form>
 
-          <div className={cn("bezel rounded-xl border p-5", panel)}>
+          <div className={cn("bezel rounded-xl border p-6", panel)}>
             <div className="flex flex-wrap items-center gap-3">
               <StatusDot status={result.status} />
               <p className="font-display text-2xl text-fg">{result.headline}</p>
@@ -166,33 +166,33 @@ export function HardwareAdvisor() {
               <Row k="LoRAs / refs" v={result.loras} />
             </dl>
             <div className="mt-6">
-              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+              <p className="font-mono text-xs uppercase tracking-[0.16em] text-fg">
                 Disable first on OOM
               </p>
-              <ol className="mt-2 list-decimal space-y-1 pl-5 text-sm text-muted">
+              <ol className="mt-2 list-decimal space-y-1 pl-5 text-base text-fg">
                 {result.oomOrder.map((x) => (
                   <li key={x}>{x}</li>
                 ))}
               </ol>
             </div>
             <div className="mt-6">
-              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+              <p className="font-mono text-xs uppercase tracking-[0.16em] text-fg">
                 RAM warnings
               </p>
-              <ul className="mt-2 space-y-2 text-sm text-muted">
+              <ul className="mt-2 space-y-2 text-base text-fg">
                 {result.ramWarnings.map((x) => (
                   <li key={x}>{x}</li>
                 ))}
               </ul>
             </div>
-            <p className="mt-4 text-sm text-muted">{result.solNote}</p>
-            <p className="mt-3 text-sm text-muted">{result.autoTune}</p>
+            <p className="mt-4 text-base text-fg">{result.solNote}</p>
+            <p className="mt-3 text-base text-fg">{result.autoTune}</p>
 
             <div className="mt-6 grid gap-3 md:grid-cols-2">
               {[result.beginner, result.maxQuality].map((r) => (
-                <article key={r.name} className="rounded-lg border border-border bg-bg/60 p-4">
-                  <h3 className="font-display text-xl text-gold">{r.name}</h3>
-                  <ul className="mt-2 space-y-1 text-sm text-muted">
+                <article key={r.name} className="rounded-lg border border-border bg-surface p-4">
+                  <h3 className="font-display text-xl text-fg">{r.name}</h3>
+                  <ul className="mt-2 space-y-1 text-base text-fg">
                     <li>Video: {r.video}</li>
                     <li>Image: {r.image}</li>
                     <li>Audio: {r.audio}</li>
@@ -225,8 +225,8 @@ function Pick({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-sm border px-2.5 py-1.5 font-mono text-[11px] tabular uppercase tracking-[0.12em]",
-        active ? "border-gold bg-gold/15 text-gold" : "border-border text-muted hover:text-fg",
+        "chip tabular",
+        active && "chip-on",
       )}
     >
       {children}
@@ -237,8 +237,8 @@ function Pick({
 function Row({ k, v }: { k: string; v: string }) {
   return (
     <div>
-      <dt className="font-mono text-[10px] uppercase tracking-[0.14em] text-gold">{k}</dt>
-      <dd className="mt-1 text-sm text-muted">{v}</dd>
+      <dt className="font-mono text-xs uppercase tracking-[0.14em] text-fg">{k}</dt>
+      <dd className="mt-1 text-base text-muted">{v}</dd>
     </div>
   );
 }

@@ -12,10 +12,10 @@ export function CheatSheet() {
         />
         <ol className="grid gap-3 md:grid-cols-2">
           {RULES.map((r) => (
-            <li key={r.n} className="rounded-xl border border-border bg-surface p-5">
-              <p className="font-mono text-[11px] text-gold">{r.n}</p>
+            <li key={r.n} className="rounded-xl border border-border bg-surface p-5 bezel">
+              <p className="font-mono text-xs text-gold">{r.n}</p>
               <h3 className="mt-1 font-display text-2xl text-fg">{r.title}</h3>
-              <p className="mt-2 text-sm text-muted">{r.body}</p>
+              <p className="mt-2 text-base leading-[1.55] text-fg">{r.body}</p>
             </li>
           ))}
         </ol>
@@ -24,16 +24,16 @@ export function CheatSheet() {
           {FAQ.map((f) => (
             <details
               key={f.q}
-              className="rounded-xl border border-border bg-inset px-5 py-4"
+              className="rounded-xl border border-border bg-surface px-5 py-4"
             >
               <summary className="cursor-pointer font-display text-xl text-fg">
                 {f.q}
               </summary>
-              <p className="mt-2 text-sm leading-relaxed text-muted">{f.a}</p>
+              <p className="mt-2 text-base leading-[1.55] text-fg">{f.a}</p>
             </details>
           ))}
         </div>
-        <footer className="mt-16 border-t border-border pt-8 text-sm text-subtle">
+        <footer className="mt-16 border-t border-border pt-8 text-base text-muted">
           <p>
             Teaching replica of Maestro v1.8.7.1 (Blizaine). Not affiliated. Labels marked
             “typical Studio control” describe function when the exact UI string may differ.

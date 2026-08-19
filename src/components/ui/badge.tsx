@@ -3,19 +3,19 @@ import type { BadgeId } from "@/data/types";
 import { BADGE_LABELS } from "@/data/models";
 
 const tone: Record<BadgeId, string> = {
-  beginner: "border-gold/35 text-gold",
-  pro: "border-paper/40 text-paper",
-  fast: "border-safe/50 text-safe",
-  heavy: "border-crash/50 text-crash",
-  "audio-native": "border-gold-bright/40 text-gold-bright",
-  "long-form": "border-muted/50 text-muted",
+  beginner: "bg-safe-bg text-safe",
+  pro: "bg-pro-bg text-pro",
+  fast: "bg-inset text-gold",
+  heavy: "bg-pro-bg text-pro",
+  "audio-native": "bg-audio-bg text-audio",
+  "long-form": "bg-long-bg text-muted",
 };
 
 export function Badge({ id, className }: { id: BadgeId; className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex h-6 items-center rounded-full border px-2 font-mono text-[10px] uppercase tracking-[0.14em]",
+        "inline-flex h-7 items-center rounded-full px-2.5 font-mono text-xs uppercase tracking-[0.14em]",
         tone[id],
         className,
       )}
@@ -31,9 +31,9 @@ export function StatusDot({
   status: "comfortable" | "tight" | "crash";
 }) {
   const map = {
-    comfortable: "bg-safe text-bg",
-    tight: "bg-warn text-bg",
-    crash: "bg-crash text-fg",
+    comfortable: "bg-safe text-ink",
+    tight: "bg-warn text-ink",
+    crash: "bg-crash text-ink",
   };
   const label = {
     comfortable: "Comfortable",
@@ -41,7 +41,12 @@ export function StatusDot({
     crash: "Likely crash",
   };
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em]", map[status])}>
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full px-3 py-1 font-mono text-xs uppercase tracking-[0.14em]",
+        map[status],
+      )}
+    >
       {label[status]}
     </span>
   );

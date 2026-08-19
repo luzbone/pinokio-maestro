@@ -17,7 +17,7 @@ export const RULES = [
   {
     n: "04",
     title: "If a resolution vanished, it was never on that model.",
-    body: "1080p is not a universal size. H3's heavy path is a 1440 short edge. LTX is megapixel-based. Wan is often 480p / 720p. Auto-Tune will hide what the checkpoint cannot do.",
+    body: "1080p is listed in Director and on Flux stills, but it is not a universal video size. H3's heavy path is a 1440 short edge. LTX is often megapixel-based. Wan is often 480p / 720p. Auto-Tune will hide what the checkpoint cannot do.",
   },
   {
     n: "05",
@@ -58,7 +58,7 @@ export const FAQ = [
   },
   {
     q: "Why did 1080p disappear when I changed models?",
-    a: "That checkpoint never offered it. H3 lists Match Output, draft sizes, and a heavy 1440-short-edge class — not a generic HD menu. LTX lists megapixels. Wan lists 480p / 720p more often than 1080p. The picker is honest.",
+    a: "That checkpoint never offered it. Director and Flux stills often list 480p / 540p / 720p / 1080p. H3 video is Match Output, a draft class, and a heavy 1440-short-edge — not a generic HD menu. LTX may list megapixels. Wan is often 480p / 720p. The picker is honest.",
   },
   {
     q: "Studio or Director?",
@@ -66,7 +66,7 @@ export const FAQ = [
   },
   {
     q: "Music3 or ACE-Step?",
-    a: "Music3 writes complete stereo songs, 5 s–5 min, two-minute default, duration-aware lyrics — and it is a Director soundtrack option. ACE-Step XL is the quality ACE path; Turbo is the sketch. If you already have a master, use existing track and skip both.",
+    a: "Music3 writes complete stereo songs, 5 s–5 min, two-minute default, duration-aware lyrics — and it is a Director soundtrack option. ACE-Step XL is the quality ACE path; Turbo is the sketch. If you already have a master, use Upload a track and skip both.",
   },
   {
     q: "What did v1.8.7.1 actually change?",

@@ -19,8 +19,10 @@ export function Knob({
   return (
     <div
       className={cn(
-        "rounded-md border border-transparent p-2 transition-colors duration-150",
-        active ? "border-gold/40 bg-gold/5" : "hover:border-border",
+        "rounded-md border p-2.5 transition-colors duration-150",
+        active
+          ? "border-gold bg-gold/10"
+          : "border-transparent hover:border-border",
         className,
       )}
     >
@@ -29,7 +31,7 @@ export function Knob({
           <button
             type="button"
             onClick={() => open(controlId)}
-            className="text-left font-mono text-[10px] uppercase tracking-[0.14em] text-muted hover:text-gold"
+            className="text-left font-mono text-xs uppercase tracking-[0.14em] text-muted hover:text-fg"
           >
             {label}
           </button>
@@ -37,7 +39,7 @@ export function Knob({
         <button
           type="button"
           onClick={() => open(controlId)}
-          className="font-mono text-[10px] uppercase tracking-[0.12em] text-gold/70 hover:text-gold"
+          className="inline-flex h-8 items-center rounded-sm border border-border bg-surface px-2.5 font-mono text-xs font-medium uppercase tracking-[0.12em] text-fg hover:border-gold hover:bg-gold hover:text-ink"
         >
           Explain
         </button>

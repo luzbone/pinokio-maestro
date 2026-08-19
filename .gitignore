@@ -3,3 +3,34 @@ node_modules/
 .github_repo
 .env
 .env.*
+!.env.example
+
+# build / local tooling
+dist/
+.output/
+.nitro/
+.vinxi/
+.tanstack/
+.vite/
+.wrangler/
+.cache/
+
+# logs / OS
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# editor
+.idea/
+*.swp
+
+# tests
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+coverage/
+
+# grok / agent local
+.grok/

@@ -89,7 +89,7 @@ function Home() {
       <div className="film-grain" aria-hidden />
       <a
         href="#models"
-        className="absolute left-4 top-3 z-50 -translate-y-16 bg-gold px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em] text-bg opacity-0 focus:translate-y-0 focus:opacity-100"
+        className="absolute left-4 top-3 z-50 -translate-y-16 bg-gold px-3 py-2 font-mono text-xs uppercase tracking-[0.14em] text-ink opacity-0 focus:translate-y-0 focus:opacity-100"
       >
         Skip to models
       </a>

@@ -13,20 +13,20 @@ export function Inspector() {
 
   return (
     <aside
-      className="shutter-open flex h-full min-h-0 flex-col border-l border-border bg-surface"
+      className="shutter-open flex h-full min-h-0 flex-col border-l border-border bg-surface px-1"
       role="dialog"
       aria-labelledby="inspector-title"
     >
-      <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-4">
+      <div className="flex items-start justify-between gap-3 border-b border-border px-6 py-5">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-gold">
+          <p className="font-mono text-xs uppercase tracking-[0.18em] text-gold">
             Inspector
           </p>
           <h3 id="inspector-title" className="mt-1 font-display text-2xl text-fg">
             {control.maestroName}
           </h3>
           {control.typical ? (
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+            <p className="mt-1 font-mono text-xs uppercase tracking-[0.14em] text-muted">
               Typical Studio control
             </p>
           ) : null}
@@ -35,7 +35,7 @@ export function Inspector() {
           <X className="size-4" />
         </Button>
       </div>
-      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-4 py-4">
+      <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-6 py-6">
         <div className="flex flex-wrap gap-1.5">
           {control.badges.map((b) => (
             <Badge key={b} id={b} />
@@ -45,10 +45,10 @@ export function Inspector() {
         <Block title="Beginner" body={`${control.beginner} Default: ${control.beginnerDefault}`} />
         {control.low || control.mid || control.high ? (
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+            <p className="font-mono text-xs uppercase tracking-[0.16em] text-gold">
               Low / mid / high
             </p>
-            <dl className="mt-2 space-y-2 text-sm text-muted">
+            <dl className="mt-2 space-y-2 text-base text-fg">
               {control.low ? (
                 <div>
                   <dt className="font-medium text-fg">Low</dt>
@@ -79,8 +79,8 @@ export function Inspector() {
 function Block({ title, body }: { title: string; body: string }) {
   return (
     <div>
-      <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">{title}</p>
-      <p className="mt-2 text-sm leading-relaxed text-muted">{body}</p>
+      <p className="font-mono text-xs uppercase tracking-[0.16em] text-gold">{title}</p>
+      <p className="mt-2 text-base leading-[1.55] text-fg">{body}</p>
     </div>
   );
 }

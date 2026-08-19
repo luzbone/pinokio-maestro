@@ -30,9 +30,9 @@ export function DirectorConsole() {
           lede="Setup locks after planning. Click any stage to see what the local LLM is doing, and what you can safely edit."
         />
 
-        <div className="bezel overflow-hidden rounded-xl border border-border bg-bg-soft">
+        <div className="bezel overflow-hidden rounded-xl border border-border bg-surface">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2">
-            <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-gold">
+            <p className="font-mono text-xs uppercase tracking-[0.18em] text-gold">
               Director v2 · {d.locked ? "Setup locked" : "Setup open"}
             </p>
             <div className="flex gap-2">
@@ -46,7 +46,7 @@ export function DirectorConsole() {
           </div>
 
           <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_340px]">
-            <div className="p-4">
+            <div className="bg-inset/40 p-5">
               <fieldset disabled={d.locked} className="grid gap-3 md:grid-cols-2">
                 <Field label="Skill">
                   <Chip
@@ -57,14 +57,20 @@ export function DirectorConsole() {
                     ]}
                     onChange={(skill) => setDirector({ skill: skill as typeof d.skill })}
                   />
+                  <p className="mt-2 text-xs text-muted">
+                    {d.skill === "music-video"
+                      ? "Automated music video from audio."
+                      : "Dialogue-driven scenes from audio."}
+                  </p>
+                  <p className="mt-1 text-xs text-muted">Video Podcast and Viral Video — coming soon.</p>
                 </Field>
-                <Field label="Soundtrack">
+                <Field label="Track">
                   <Chip
                     value={d.soundtrack}
                     options={[
-                      { value: "existing", label: "Existing track" },
-                      { value: "music3", label: "Generate Music3" },
-                      { value: "acestep", label: "Generate ACE-Step" },
+                      { value: "existing", label: "Upload a track" },
+                      { value: "music3", label: "Generate a track · Music3" },
+                      { value: "acestep", label: "Generate a track · ACE-Step" },
                     ]}
                     onChange={(soundtrack) =>
                       setDirector({ soundtrack: soundtrack as typeof d.soundtrack })
@@ -72,40 +78,39 @@ export function DirectorConsole() {
                   />
                 </Field>
                 <Field label="Aspect">
-                  <select
-                    className="h-10 w-full rounded-sm border border-border bg-inset px-2 text-sm"
+                  <Chip
                     value={d.aspect}
-                    onChange={(e) => setDirector({ aspect: e.target.value })}
-                  >
-                    <option>16:9</option>
-                    <option>9:16</option>
-                    <option>21:9</option>
-                    <option>1:1</option>
-                  </select>
+                    options={[
+                      { value: "16:9", label: "16:9 Wide" },
+                      { value: "9:16", label: "9:16 Portrait" },
+                      { value: "1:1", label: "1:1 Square" },
+                      { value: "4:3", label: "4:3 Classic" },
+                      { value: "3:4", label: "3:4 Tall" },
+                    ]}
+                    onChange={(aspect) => setDirector({ aspect })}
+                  />
                 </Field>
                 <Field label="Resolution">
-                  <select
-                    className="h-10 w-full rounded-sm border border-border bg-inset px-2 text-sm"
-                    value={d.resolution}
-                    onChange={(e) => setDirector({ resolution: e.target.value })}
-                  >
-                    <option>Match output</option>
-                    <option>768-class draft</option>
-                    <option>0.4 MP</option>
-                    <option>1 MP</option>
-                  </select>
+                  <Chip
+                    value={["480p", "540p", "720p", "1080p"].includes(d.resolution) ? d.resolution : "720p"}
+                    options={[
+                      { value: "480p", label: "480p" },
+                      { value: "540p", label: "540p" },
+                      { value: "720p", label: "720p" },
+                      { value: "1080p", label: "1080p" },
+                    ]}
+                    onChange={(resolution) => setDirector({ resolution })}
+                  />
                 </Field>
                 <Field label="Workflow">
-                  <select
-                    className="h-10 w-full rounded-sm border border-border bg-inset px-2 text-sm"
-                    value={d.workflow}
-                    onChange={(e) => setDirector({ workflow: e.target.value })}
-                  >
-                    <option>Seamless</option>
-                    <option>Cut coverage</option>
-                    <option>Omni refs</option>
-                    <option>Audio-driven</option>
-                  </select>
+                  <Chip
+                    value={d.workflow === "Seamless" || d.workflow === "Auto" ? d.workflow : "Auto"}
+                    options={[
+                      { value: "Seamless", label: "Seamless" },
+                      { value: "Auto", label: "Auto" },
+                    ]}
+                    onChange={(workflow) => setDirector({ workflow })}
+                  />
                 </Field>
                 <Field label="Video model">
                   <select
@@ -147,7 +152,7 @@ export function DirectorConsole() {
               </fieldset>
 
               <div className="mt-4">
-                <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+                <p className="font-mono text-xs uppercase tracking-[0.16em] text-gold">
                   Pacing-bias
                 </p>
                 <input
@@ -166,8 +171,8 @@ export function DirectorConsole() {
                 </p>
               </div>
 
-              <div className="mt-4 rounded-md border border-border bg-inset p-3 text-sm text-muted">
-                <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-gold">
+              <div className="mt-4 rounded-md border border-border bg-inset p-3 text-base text-fg">
+                <p className="font-mono text-xs uppercase tracking-[0.14em] text-gold">
                   Character / voice / location refs
                 </p>
                 <p className="mt-2">
@@ -177,7 +182,7 @@ export function DirectorConsole() {
 
               {d.locked ? (
                 <div className="mt-4 rounded-md border border-gold/30 bg-gold/5 p-3 text-sm">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-gold">
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-gold">
                     After planning · H3-aware
                   </p>
                   <p className="mt-2 text-fg">
@@ -197,11 +202,11 @@ export function DirectorConsole() {
                       className={cn(
                         "h-full w-full rounded-md border px-3 py-3 text-left",
                         d.stage === s.id
-                          ? "border-gold bg-gold/10 text-fg"
+                          ? "border-gold bg-gold text-ink"
                           : "border-border bg-surface text-muted hover:text-fg",
                       )}
                     >
-                      <span className="font-mono text-[10px] text-gold">
+                      <span className={cn("font-mono text-xs", d.stage === s.id ? "text-ink/70" : "text-gold")}>
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <span className="mt-1 block font-display text-lg">{s.label}</span>
@@ -211,17 +216,17 @@ export function DirectorConsole() {
               </ol>
             </div>
 
-            <aside className="border-t border-border bg-surface p-4 lg:border-l lg:border-t-0">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-gold">
+            <aside className="border-t border-border bg-surface px-6 py-7 lg:border-l lg:border-t-0">
+              <p className="font-mono text-xs uppercase tracking-[0.18em] text-gold">
                 Stage inspector
               </p>
               <h3 className="mt-2 font-display text-2xl text-fg">{stage.label}</h3>
-              <p className="mt-3 text-sm text-muted">
-                <span className="text-fg">What the LLM is doing. </span>
+              <p className="mt-3 text-base leading-[1.55] text-fg">
+                <span className="font-medium">What the LLM is doing. </span>
                 {stage.llm}
               </p>
-              <p className="mt-3 text-sm text-muted">
-                <span className="text-fg">Safe to edit. </span>
+              <p className="mt-3 text-base leading-[1.55] text-fg">
+                <span className="font-medium">Safe to edit. </span>
                 {stage.safeEdit}
               </p>
             </aside>
@@ -229,20 +234,20 @@ export function DirectorConsole() {
 
           <div className="border-t border-border p-4">
             <h3 className="font-display text-2xl text-fg">Dashboard</h3>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-1 text-base text-fg">
               Past runs, re-run one clip, repair missing pieces, rejoin, resume after refresh.
             </p>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {SAMPLE_RUNS.map((run) => (
                 <article key={run.id} className="rounded-lg border border-border bg-inset p-4">
-                  <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-gold">
+                  <p className="font-mono text-xs uppercase tracking-[0.14em] text-gold">
                     {run.id} · {run.skill.replace("-", " ")}
                   </p>
                   <h4 className="mt-1 font-display text-xl text-fg">{run.title}</h4>
                   <p className="mt-1 text-xs text-muted">{run.model}</p>
                   <p className="mt-1 font-mono text-xs text-gold">{run.duration}</p>
-                  <p className="mt-2 text-sm text-muted">{run.note}</p>
-                  <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.14em] text-paper">
+                  <p className="mt-2 text-base text-fg">{run.note}</p>
+                  <p className="mt-3 font-mono text-xs uppercase tracking-[0.14em] text-muted">
                     {run.status.replace("-", " ")} · {run.clips} clips
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
@@ -266,7 +271,7 @@ export function DirectorConsole() {
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="block">
-      <span className="mb-1.5 block font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+      <span className="mb-1.5 block font-mono text-xs uppercase tracking-[0.14em] text-muted">
         {label}
       </span>
       {children}
@@ -291,10 +296,8 @@ function Chip({
           type="button"
           onClick={() => onChange(o.value)}
           className={cn(
-            "rounded-sm border px-2.5 py-1.5 font-mono text-[10px] uppercase tracking-[0.12em]",
-            value === o.value
-              ? "border-gold bg-gold/15 text-gold"
-              : "border-border text-muted hover:text-fg",
+            "chip",
+            value === o.value && "chip-on",
           )}
         >
           {o.label}

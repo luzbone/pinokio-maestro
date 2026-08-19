@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { MODELS, modelById } from "@/data/models";
 import { DEFAULT_ADVISOR, type AdvisorInput } from "@/data/hardware";
 import type { MediaKind } from "@/data/types";
+import { defaultSub, leafOf, resolveModelId, type AudioSub, type EditSub, type StudioCategory, type ToolsSub, type VideoSub } from "@/data/studio-tree";
 
 export type SectionId =
   | "models"
@@ -35,6 +36,12 @@ export type QueueJob = {
 };
 
 type StudioSlice = {
+  category: StudioCategory;
+  videoSub: VideoSub;
+  audioSub: AudioSub;
+  editSub: EditSub;
+  toolsSub: ToolsSub;
+  advancedOpen: boolean;
   mode: MediaKind;
   modelId: string;
   workflow: string;
@@ -58,6 +65,9 @@ type StudioSlice = {
   v2a: boolean;
   v2v: number;
   blend: boolean;
+  pipelineMode: "single" | "standard" | "progressive";
+  selfRefiner: boolean;
+  mmaudio: boolean;
   aiPlan: boolean;
   grain: number;
   upscale: boolean;
@@ -66,6 +76,15 @@ type StudioSlice = {
   loras: LoraSlot[];
   refs: RefSlot[];
   queue: QueueJob[];
+  outputCount: number;
+  speakerPause: number;
+  temperature: number;
+  autoSplit: string;
+  controlImage: string;
+  controlVideo: string;
+  retakeEngine: "native" | "legacy";
+  upscaleMethod: "flashvsr" | "lanczos";
+  speechDuration: number;
 };
 
 type DirectorSlice = {
@@ -97,6 +116,7 @@ type State = {
   setStudio: (patch: Partial<StudioSlice>) => void;
   setModel: (id: string) => void;
   setMode: (mode: MediaKind) => void;
+  setCategory: (category: StudioCategory) => void;
   setDirector: (patch: Partial<DirectorSlice>) => void;
   planDirector: () => void;
   resetDirector: () => void;
@@ -121,7 +141,7 @@ const studioFor = (modelId: string): Partial<StudioSlice> => {
   const m = modelById(modelId) ?? firstOf("video");
   return {
     modelId: m.id,
-    workflow: m.workflows[0] ?? "Text to video",
+    workflow: m.workflows[0] ?? "Frames",
     aspect: m.aspects[0] ?? "16:9",
     resolution: m.resolutions[0] ?? "Match output",
     duration: m.maxNativeSec ? Math.min(8, m.maxNativeSec) : 8,
@@ -134,9 +154,15 @@ const studioFor = (modelId: string): Partial<StudioSlice> => {
 };
 
 const initialStudio = (): StudioSlice => ({
+  category: "video",
+  videoSub: "frames",
+  audioSub: "speech",
+  editSub: "retake",
+  toolsSub: "upscale",
+  advancedOpen: true,
   mode: "video",
   modelId: "h3-omni-pruned",
-  workflow: "Omni / Ref2VA",
+  workflow: "Frames",
   aspect: "16:9",
   resolution: "Match output",
   duration: 8,
@@ -157,6 +183,9 @@ const initialStudio = (): StudioSlice => ({
   v2a: false,
   v2v: 0.35,
   blend: false,
+  pipelineMode: "standard",
+  selfRefiner: false,
+  mmaudio: false,
   aiPlan: true,
   grain: 0,
   upscale: false,
@@ -167,14 +196,23 @@ const initialStudio = (): StudioSlice => ({
   ],
   refs: [],
   queue: [],
+  outputCount: 1,
+  speakerPause: 0.5,
+  temperature: 1,
+  autoSplit: "",
+  controlImage: "none",
+  controlVideo: "default",
+  retakeEngine: "native",
+  upscaleMethod: "flashvsr",
+  speechDuration: 20,
 });
 
 const initialDirector = (): DirectorSlice => ({
   skill: "music-video",
   soundtrack: "music3",
   aspect: "16:9",
-  resolution: "Match output",
-  workflow: "Seamless",
+  resolution: "720p",
+  workflow: "Auto",
   videoModel: "h3-omni-pruned",
   imageModel: "krea-identity",
   review: "manual",
@@ -203,10 +241,44 @@ export const useConsole = create<State>()(
         set({
           studio: {
             ...get().studio,
+            category: mode,
+            videoSub: mode === "video" ? get().studio.videoSub : get().studio.videoSub,
             mode,
             ...studioFor(m.id),
             refs: [],
             queue: get().studio.queue,
+          },
+        });
+      },
+      setCategory: (category) => {
+        const current = get().studio;
+        const sub =
+          category === "video"
+            ? (current.videoSub ?? "frames")
+            : category === "audio"
+              ? (current.audioSub ?? "speech")
+              : category === "edit"
+                ? (current.editSub ?? "retake")
+                : category === "tools"
+                  ? (current.toolsSub ?? "upscale")
+                  : defaultSub(category);
+        const leaf = leafOf(category, sub);
+        const nextModel = resolveModelId(leaf, current.modelId);
+        const kind: MediaKind =
+          category === "image" || category === "video" || category === "audio"
+            ? category
+            : (nextModel ? (modelById(nextModel)?.kind ?? current.mode) : current.mode);
+        set({
+          studio: {
+            ...current,
+            category,
+            videoSub: current.videoSub ?? "frames",
+            audioSub: current.audioSub ?? "speech",
+            editSub: current.editSub ?? "retake",
+            toolsSub: current.toolsSub ?? "upscale",
+            mode: kind,
+            ...(nextModel ? studioFor(nextModel) : {}),
+            queue: current.queue,
           },
         });
       },

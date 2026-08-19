@@ -21,11 +21,12 @@ export const OVERVIEW = {
       zone: "Sidebar",
       items: [
         "Studio / Director switch",
-        "Model family and workflow",
-        "Prompt",
-        "LoRAs (with recommended weights)",
-        "Advanced (Turbo, Sol Engine, First Block Cache, windows)",
-        "Workspace switcher",
+        "Image / Video / Audio / Edit / Tools",
+        "Video: Frames · Multi-Shot · Extend · Blend",
+        "Audio: Speech · Music · SFX · Mixer",
+        "Edit: Retake · Edit Anything · Outpaint · Repaint · Recast",
+        "Tools: Upscale · Revoice (no Advanced drawer)",
+        "Each subcategory (except Tools) has its own Advanced menu",
       ],
     },
     {

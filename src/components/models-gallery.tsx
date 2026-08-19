@@ -8,7 +8,7 @@ import {
   modelsByKind,
   type StudioModel,
 } from "@/data/models";
-import type { GoalId, MediaKind } from "@/data/types";
+import type { GoalId, MediaKind, ModelFamily } from "@/data/types";
 import { cn } from "@/lib/cn";
 import { useConsole } from "@/store/console-store";
 
@@ -16,7 +16,7 @@ const GOALS: GoalId[] = ["talking", "music-video", "stills", "long-sequence", "l
 
 export function ModelsGallery() {
   const [goal, setGoal] = useState<GoalId | "all">("all");
-  const [open, setOpen] = useState<string | null>("h3-omni-pruned");
+  const [open, setOpen] = useState<string | null>(null);
   const setModel = useConsole((s) => s.setModel);
   const setMode = useConsole((s) => s.setMode);
   const setPanel = useConsole((s) => s.setPanel);
@@ -43,7 +43,7 @@ export function ModelsGallery() {
         />
 
         <div className="mb-10">
-          <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-gold">
+          <p className="mb-3 font-mono text-xs uppercase tracking-[0.18em] text-gold">
             I want
           </p>
           <div className="flex flex-wrap gap-2">
@@ -80,25 +80,29 @@ export function ModelsGallery() {
                       className="block w-full text-left"
                       onClick={() => setOpen(open === m.id ? null : m.id)}
                     >
-                      <div className="relative h-36 overflow-hidden">
-                        <img src={m.image} alt="" className="size-full object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent" />
+                      <div className="relative h-40 overflow-hidden">
+                        <img
+                          src={m.image}
+                          alt=""
+                          className={cn("size-full object-cover", stillCrop(m.family))}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/20 to-transparent" />
                       </div>
                       <div className="p-4">
-                        <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-gold">
+                        <p className="font-mono text-xs uppercase tracking-[0.16em] text-gold">
                           {m.maestroLabel}
                         </p>
                         <h4 className="mt-1 font-display text-2xl text-fg">
                           {m.name}
                           <span className="ml-2 text-lg text-muted">{m.variant}</span>
                         </h4>
-                        <p className="mt-2 text-sm text-muted">{m.blurb}</p>
+                        <p className="mt-2 text-base leading-[1.55] text-fg">{m.blurb}</p>
                         <div className="mt-3 flex flex-wrap gap-1.5">
                           {m.badges.map((b) => (
                             <Badge key={b} id={b} />
                           ))}
                           {m.typical ? (
-                            <span className="font-mono text-[10px] uppercase tracking-[0.12em] text-subtle">
+                            <span className="font-mono text-xs uppercase tracking-[0.12em] text-muted">
                               Typical Studio control
                             </span>
                           ) : null}
@@ -106,27 +110,38 @@ export function ModelsGallery() {
                       </div>
                     </button>
                     {open === m.id ? (
-                      <div className="shutter-open space-y-3 border-t border-border px-4 py-4 text-sm text-muted">
+                      <div className="shutter-open space-y-3 border-t border-border px-4 py-4 text-base leading-[1.55] text-fg">
                         <p>
                           <span className="text-fg">Pro. </span>
                           {m.pro}
                         </p>
-                        <p>
-                          <span className="text-fg">Motion. </span>
-                          {m.motion}
-                        </p>
-                        <p>
-                          <span className="text-fg">Audio. </span>
-                          {m.audio}
-                        </p>
+                        {m.kind !== "image" ? (
+                          <p>
+                            <span className="text-fg">Motion. </span>
+                            {m.motion}
+                          </p>
+                        ) : (
+                          <p>
+                            <span className="text-fg">Job. </span>
+                            {m.workflows.join(" · ")}
+                          </p>
+                        )}
+                        {m.kind !== "image" ? (
+                          <p>
+                            <span className="text-fg">Audio. </span>
+                            {m.audio}
+                          </p>
+                        ) : null}
                         <p>
                           <span className="text-fg">Resolution. </span>
                           {m.resolution}
                         </p>
-                        <p>
-                          <span className="text-fg">Window. </span>
-                          {m.window}
-                        </p>
+                        {m.kind !== "image" ? (
+                          <p>
+                            <span className="text-fg">Window. </span>
+                            {m.window}
+                          </p>
+                        ) : null}
                         <p>
                           <span className="text-fg">VRAM / RAM. </span>
                           {m.vram} {m.ram}
@@ -152,6 +167,25 @@ export function ModelsGallery() {
   );
 }
 
+const STILL_CROP: Record<ModelFamily, string> = {
+  h3: "object-[center_28%]",
+  ltx25: "object-center",
+  ltx23: "object-[center_42%]",
+  wan: "object-[center_62%]",
+  hunyuan: "object-[center_38%]",
+  flux: "object-[center_22%]",
+  krea: "object-[center_32%]",
+  qwen: "object-[right_center]",
+  music3: "object-center",
+  acestep: "object-[center_72%]",
+  tts: "object-left",
+  sfx: "object-right",
+};
+
+function stillCrop(family: ModelFamily) {
+  return STILL_CROP[family] ?? "object-center";
+}
+
 function Chooser({
   active,
   onClick,
@@ -166,8 +200,8 @@ function Chooser({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3 py-2 font-mono text-[11px] uppercase tracking-[0.14em]",
-        active ? "border-gold bg-gold/15 text-gold" : "border-border text-muted hover:text-fg",
+        "chip rounded-full px-3 py-2",
+        active && "chip-on",
       )}
     >
       {children}
@@ -176,27 +210,54 @@ function Chooser({
 }
 
 function Comparison({ kind, rows }: { kind: MediaKind; rows: StudioModel[] }) {
+  const cols =
+    kind === "image"
+      ? ([
+          { key: "model", label: "Model" },
+          { key: "job", label: "Job" },
+          { key: "size", label: "Native size" },
+          { key: "vram", label: "VRAM" },
+          { key: "pick", label: "Pick this if" },
+        ] as const)
+      : ([
+          { key: "model", label: "Model" },
+          { key: "audio", label: "Audio" },
+          { key: "window", label: "Window / length" },
+          { key: "vram", label: "VRAM" },
+          { key: "pick", label: "Pick this if" },
+        ] as const);
+
+  const cell = (m: StudioModel, key: (typeof cols)[number]["key"]) => {
+    if (key === "model") return m.maestroLabel;
+    if (key === "job") return m.workflows.join(" · ");
+    if (key === "size") return m.resolutions.join(" / ");
+    if (key === "audio") return m.audio;
+    if (key === "window") return m.window;
+    if (key === "vram") return m.vram;
+    return m.pickIf;
+  };
+
   return (
     <div className="mt-6 overflow-x-auto rounded-xl border border-border bg-inset">
       <table className="w-full min-w-[720px] text-left text-sm">
         <caption className="sr-only">{kind} comparison</caption>
-        <thead className="font-mono text-[10px] uppercase tracking-[0.14em] text-gold">
+        <thead className="font-mono text-xs uppercase tracking-[0.14em] text-gold">
           <tr className="border-b border-border">
-            <th className="px-3 py-3">Model</th>
-            <th className="px-3 py-3">Audio</th>
-            <th className="px-3 py-3">Window / length</th>
-            <th className="px-3 py-3">VRAM</th>
-            <th className="px-3 py-3">Pick this if</th>
+            {cols.map((c) => (
+              <th key={c.key} className="px-3 py-3">
+                {c.label}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
           {rows.map((m) => (
             <tr key={m.id} className="border-b border-border/70 last:border-0">
-              <td className="px-3 py-3 text-fg">{m.maestroLabel}</td>
-              <td className="px-3 py-3 text-muted">{m.audio}</td>
-              <td className="px-3 py-3 text-muted">{m.window}</td>
-              <td className="px-3 py-3 text-muted">{m.vram}</td>
-              <td className="px-3 py-3 text-muted">{m.pickIf}</td>
+              {cols.map((c) => (
+                <td key={c.key} className="px-3 py-3 text-fg">
+                  {cell(m, c.key)}
+                </td>
+              ))}
             </tr>
           ))}
         </tbody>

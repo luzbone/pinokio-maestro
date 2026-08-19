@@ -7,11 +7,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        primary: "bg-gold text-bg hover:bg-gold-bright",
+        primary: "bg-gold text-ink hover:bg-gold-bright",
         secondary:
-          "border border-gold/35 bg-transparent text-gold hover:bg-gold/10",
+          "border border-border bg-transparent text-fg hover:border-gold hover:bg-elevated",
         ghost: "text-muted hover:bg-elevated hover:text-fg",
-        danger: "border border-crash/50 text-crash hover:bg-crash/10",
+        danger: "border border-crash/60 text-crash hover:bg-pro-bg",
       },
       size: {
         sm: "h-9 px-3",
