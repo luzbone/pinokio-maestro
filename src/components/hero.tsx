@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { asset } from "@/lib/asset";
 import { useConsole } from "@/store/console-store";
 
 export function Hero() {
@@ -12,7 +13,7 @@ export function Hero() {
   return (
     <section id="top" className="relative min-h-[88vh] overflow-hidden">
       <img
-        src="/hero.jpg"
+        src={asset("/hero.jpg")}
         alt=""
         className="absolute inset-0 size-full object-cover object-[center_58%]"
       />

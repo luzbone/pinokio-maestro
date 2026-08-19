@@ -9,6 +9,7 @@ import {
   type StudioModel,
 } from "@/data/models";
 import type { GoalId, MediaKind, ModelFamily } from "@/data/types";
+import { asset } from "@/lib/asset";
 import { cn } from "@/lib/cn";
 import { useConsole } from "@/store/console-store";
 
@@ -82,7 +83,7 @@ export function ModelsGallery() {
                     >
                       <div className="relative h-40 overflow-hidden">
                         <img
-                          src={m.image}
+                          src={asset(m.image)}
                           alt=""
                           className={cn("size-full object-cover", stillCrop(m.family))}
                         />
