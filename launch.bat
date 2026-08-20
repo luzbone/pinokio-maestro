@@ -30,7 +30,9 @@ echo.
 
 rem Separate minimized window. /b in the same console lets timeout steal
 rem stdin from Vite, so the server never prints "ready" and never binds.
-start "Maestro opener" /min cmd /d /c "for /l %%i in (1,1,90) do @curl.exe -sf http://127.0.0.1:8080/ >nul 2>&1 && start http://localhost:8080/ && exit /b 0 & ping -n 2 127.0.0.1 >nul"
+rem Do not inline the wait loop: cmd /c "… && exit /b" ignores /b, so the
+rem loop kept calling start http://… every second and reopened the browser.
+start "Maestro opener" /min cmd /d /c call "%~dp0scripts\open-when-ready.bat"
 
 call npm.cmd run dev
 if errorlevel 1 (
