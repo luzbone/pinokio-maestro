@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { FilmNav } from "@/components/film-nav";
 import { Hero } from "@/components/hero";
@@ -23,11 +23,19 @@ const SECTIONS: SectionId[] = [
   "cheat",
 ];
 
+function QueueTicker() {
+  const running = useConsole((s) => s.studio.queue.some((j) => j.status === "running"));
+  useEffect(() => {
+    if (!running) return;
+    const id = window.setInterval(() => useConsole.getState().tickQueue(), 380);
+    return () => window.clearInterval(id);
+  }, [running]);
+  return null;
+}
+
 function Home() {
-  const lastPanel = useConsole((s) => s.lastPanel);
-  const setPanel = useConsole((s) => s.setPanel);
+  const lockPanel = useConsole((s) => s.lockPanel);
   const setHydrated = useConsole((s) => s.setHydrated);
-  const [active, setActive] = useState<SectionId>("models");
 
   useEffect(() => {
     let cancelled = false;
@@ -35,12 +43,9 @@ function Home() {
       if (cancelled) return;
       setHydrated(true);
       const hash = window.location.hash.replace("#", "") as SectionId;
-      const stored = useConsole.getState().lastPanel;
-      const target = SECTIONS.includes(hash) ? hash : stored;
-      setActive(target);
-      if (SECTIONS.includes(hash)) setPanel(hash);
-      if (SECTIONS.includes(hash) || target !== "models") {
-        document.getElementById(target)?.scrollIntoView({ behavior: "auto" });
+      if (SECTIONS.includes(hash)) {
+        lockPanel(hash);
+        document.getElementById(hash)?.scrollIntoView({ behavior: "auto" });
       }
     };
     const result = useConsole.persist.rehydrate();
@@ -52,37 +57,46 @@ function Home() {
     return () => {
       cancelled = true;
     };
-  }, [setHydrated, setPanel]);
+  }, [setHydrated, lockPanel]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") useConsole.getState().closeInspector();
     };
+    const onHash = () => {
+      const hash = window.location.hash.replace("#", "") as SectionId;
+      if (SECTIONS.includes(hash)) lockPanel(hash);
+    };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
+    window.addEventListener("hashchange", onHash);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("hashchange", onHash);
+    };
+  }, [lockPanel]);
 
   useEffect(() => {
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (!visible?.target.id) return;
-        const id = visible.target.id as SectionId;
-        if (SECTIONS.includes(id)) {
-          setActive(id);
-          if (id !== lastPanel) setPanel(id);
-        }
-      },
-      { rootMargin: "-20% 0px -55% 0px", threshold: [0.15, 0.35, 0.6] },
-    );
-    for (const id of SECTIONS) {
-      const el = document.getElementById(id);
-      if (el) obs.observe(el);
-    }
-    return () => obs.disconnect();
-  }, [lastPanel, setPanel]);
+    let frame = 0;
+    const update = () => {
+      const y = window.scrollY + 110;
+      let current: SectionId = "models";
+      for (const id of SECTIONS) {
+        const el = document.getElementById(id);
+        if (el && el.offsetTop <= y) current = id;
+      }
+      useConsole.getState().setPanel(current);
+    };
+    const onScroll = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(update);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    update();
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
 
   return (
     <>
@@ -93,7 +107,8 @@ function Home() {
       >
         Skip to models
       </a>
-      <FilmNav active={active} />
+      <FilmNav />
+      <QueueTicker />
       <main>
         <Hero />
         <ModelsGallery />

@@ -68,9 +68,10 @@ export function DirectorConsole() {
 
           <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_340px]">
             <div className="bg-inset/40 p-5">
-              <fieldset disabled={d.locked} className="grid gap-3 md:grid-cols-2">
+              <div className="grid gap-3 md:grid-cols-2">
                 <Field label="Skill">
                   <Chip
+                    disabled={d.locked}
                     value={d.skill}
                     options={[
                       { value: "music-video", label: "Music Video" },
@@ -87,6 +88,7 @@ export function DirectorConsole() {
                 </Field>
                 <Field label="Track">
                   <Chip
+                    disabled={d.locked}
                     value={d.soundtrack}
                     options={[
                       { value: "existing", label: "Upload a track" },
@@ -100,6 +102,7 @@ export function DirectorConsole() {
                 </Field>
                 <Field label="Aspect">
                   <Chip
+                    disabled={d.locked}
                     value={d.aspect}
                     options={[
                       { value: "16:9", label: "16:9 Wide" },
@@ -113,6 +116,7 @@ export function DirectorConsole() {
                 </Field>
                 <Field label="Resolution">
                   <Chip
+                    disabled={d.locked}
                     value={["480p", "540p", "720p", "1080p"].includes(d.resolution) ? d.resolution : "720p"}
                     options={[
                       { value: "480p", label: "480p" },
@@ -125,6 +129,7 @@ export function DirectorConsole() {
                 </Field>
                 <Field label="Workflow">
                   <Chip
+                    disabled={d.locked}
                     value={d.workflow === "Seamless" || d.workflow === "Auto" ? d.workflow : "Auto"}
                     options={[
                       { value: "Seamless", label: "Seamless" },
@@ -145,11 +150,17 @@ export function DirectorConsole() {
                       </option>
                     ))}
                   </select>
+                  {d.locked ? (
+                    <p className="mt-1 text-xs text-muted">
+                      After Plan, changing the video model rebuilds clip timing without re-uploading audio.
+                    </p>
+                  ) : null}
                 </Field>
                 <Field label="Image model">
                   <select
                     className="h-10 w-full rounded-sm border border-border bg-inset px-2 text-sm"
                     value={d.imageModel}
+                    disabled={d.locked}
                     onChange={(e) => setDirector({ imageModel: e.target.value })}
                   >
                     <option value="none">None — no generated images</option>
@@ -162,6 +173,7 @@ export function DirectorConsole() {
                 </Field>
                 <Field label="Review">
                   <Chip
+                    disabled={d.locked}
                     value={d.review}
                     options={[
                       { value: "auto", label: "Auto" },
@@ -170,7 +182,7 @@ export function DirectorConsole() {
                     onChange={(review) => setDirector({ review: review as typeof d.review })}
                   />
                 </Field>
-              </fieldset>
+              </div>
 
               <div className="mt-4">
                 <p className="font-mono text-xs uppercase tracking-[0.16em] text-gold">
@@ -272,10 +284,27 @@ export function DirectorConsole() {
                     {run.status.replace("-", " ")} · {run.clips} clips
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <Button size="sm" variant="secondary">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => {
+                        enqueue("run", "director");
+                        toast(`Replica: re-running a clip from ${run.title}. No GPU work here.`);
+                      }}
+                    >
                       Re-run clip
                     </Button>
-                    <Button size="sm" variant="ghost">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() =>
+                        toast(
+                          run.status === "needs-repair"
+                            ? "Replica: repair regenerates the missing piece, then rejoins."
+                            : "Replica: rejoin stitches clips to the timeline without a full rerun.",
+                        )
+                      }
+                    >
                       Repair / rejoin
                     </Button>
                   </div>
@@ -304,10 +333,12 @@ function Chip({
   value,
   options,
   onChange,
+  disabled,
 }: {
   value: string;
   options: { value: string; label: string }[];
   onChange: (v: string) => void;
+  disabled?: boolean;
 }) {
   return (
     <div className="flex flex-wrap gap-1.5">
@@ -315,6 +346,7 @@ function Chip({
         <button
           key={o.value}
           type="button"
+          disabled={disabled}
           onClick={() => onChange(o.value)}
           className={cn(
             "chip",

@@ -3,7 +3,7 @@ import { persist } from "zustand/middleware";
 import { MODELS, modelById } from "@/data/models";
 import { DEFAULT_ADVISOR, type AdvisorInput } from "@/data/hardware";
 import type { MediaKind } from "@/data/types";
-import { defaultSub, leafOf, resolveModelId, type AudioSub, type EditSub, type StudioCategory, type ToolsSub, type VideoSub } from "@/data/studio-tree";
+import { defaultSub, leafOf, resolveModelId, studioPathForModel, type AudioSub, type EditSub, type StudioCategory, type ToolsSub, type VideoSub } from "@/data/studio-tree";
 
 export type SectionId =
   | "models"
@@ -32,7 +32,7 @@ export type QueueJob = {
   id: string;
   label: string;
   source: "studio" | "director";
-  status: "held" | "queued" | "running" | "paused" | "cancelled";
+  status: "held" | "queued" | "running" | "paused" | "cancelled" | "complete";
   progress: number;
 };
 
@@ -106,18 +106,22 @@ type DirectorSlice = {
 type State = {
   hydrated: boolean;
   lastPanel: SectionId;
+  navHoldUntil: number;
   inspectorId: string | null;
   studio: StudioSlice;
   director: DirectorSlice;
   advisor: AdvisorInput;
   setHydrated: (v: boolean) => void;
   setPanel: (id: SectionId) => void;
+  lockPanel: (id: SectionId) => void;
   openInspector: (id: string) => void;
   closeInspector: () => void;
   setStudio: (patch: Partial<StudioSlice>) => void;
   setModel: (id: string) => void;
   setMode: (mode: MediaKind) => void;
+  loadStudioModel: (id: string) => void;
   setCategory: (category: StudioCategory) => void;
+  tickQueue: () => void;
   setDirector: (patch: Partial<DirectorSlice>) => void;
   planDirector: () => void;
   resetDirector: () => void;
@@ -232,27 +236,58 @@ export const useConsole = create<State>()(
     (set, get) => ({
       hydrated: false,
       lastPanel: "models",
+      navHoldUntil: 0,
       inspectorId: null,
       studio: initialStudio(),
       director: initialDirector(),
       advisor: DEFAULT_ADVISOR,
       setHydrated: (v) => set({ hydrated: v }),
-      setPanel: (id) => set({ lastPanel: id }),
-      openInspector: (id) => set({ inspectorId: id, lastPanel: get().lastPanel }),
+      setPanel: (id) => {
+        const s = get();
+        if (Date.now() < s.navHoldUntil && id !== s.lastPanel) return;
+        if (id === s.lastPanel) return;
+        set({ lastPanel: id });
+      },
+      lockPanel: (id) => set({ lastPanel: id, navHoldUntil: Date.now() + 800 }),
+      openInspector: (id) => set({ inspectorId: id }),
       closeInspector: () => set({ inspectorId: null }),
       setStudio: (patch) => set({ studio: { ...get().studio, ...patch } }),
       setMode: (mode) => {
+        const current = get().studio;
         const m = firstOf(mode);
         set({
           studio: {
-            ...get().studio,
+            ...current,
             category: mode,
-            videoSub: mode === "video" ? get().studio.videoSub : get().studio.videoSub,
             mode,
             ...studioFor(m.id),
             refs: [],
-            queue: get().studio.queue,
+            queue: current.queue,
           },
+        });
+      },
+      loadStudioModel: (id) => {
+        const current = get().studio;
+        const path = studioPathForModel(id);
+        const m = modelById(id);
+        if (!path || !m) return;
+        const videoSub =
+          path.category === "video" && current.category === "video"
+            ? current.videoSub
+            : (path.videoSub ?? current.videoSub);
+        const audioSub = path.audioSub ?? current.audioSub;
+        set({
+          studio: {
+            ...current,
+            category: path.category,
+            videoSub,
+            audioSub,
+            mode: m.kind,
+            ...studioFor(id),
+            queue: current.queue,
+          },
+          lastPanel: "studio",
+          navHoldUntil: Date.now() + 800,
         });
       },
       setCategory: (category) => {
@@ -299,10 +334,16 @@ export const useConsole = create<State>()(
       },
       setDirector: (patch) => {
         const d = get().director;
-        if (d.locked && ("skill" in patch || "soundtrack" in patch || "videoModel" in patch || "imageModel" in patch || "aspect" in patch || "resolution" in patch || "workflow" in patch || "review" in patch)) {
+        const lockedKeys = ["skill", "soundtrack", "imageModel", "aspect", "resolution", "workflow", "review"] as const;
+        if (d.locked && lockedKeys.some((k) => k in patch)) {
           return;
         }
-        set({ director: { ...d, ...patch } });
+        const next = { ...d, ...patch };
+        if (!d.locked && "soundtrack" in patch && !("plannedDuration" in patch)) {
+          next.plannedDuration =
+            patch.soundtrack === "acestep" ? 90 : patch.soundtrack === "music3" ? 120 : next.plannedDuration;
+        }
+        set({ director: next });
       },
       planDirector: () =>
         set({
@@ -317,35 +358,56 @@ export const useConsole = create<State>()(
       enqueue: (mode = "run", source = "studio") => {
         const s = get().studio;
         const m = modelById(s.modelId);
+        const busy = s.queue.some((j) => j.status === "running");
         const job: QueueJob = {
-          id: `q-${Date.now()}`,
+          id: `q-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
           label:
             source === "director"
               ? "Director project · checkpointed replica"
               : `${m?.maestroLabel ?? "Job"} · replica`,
           source,
-          status: mode === "hold" ? "held" : "running",
-          progress: mode === "hold" ? 0 : 8,
+          status: mode === "hold" ? "held" : busy ? "queued" : "running",
+          progress: mode === "hold" || busy ? 0 : 8,
         };
         set({ studio: { ...s, queue: [job, ...s.queue].slice(0, 8) } });
       },
       startQueue: () => {
         const s = get().studio;
-        let started = false;
+        const already = s.queue.some((j) => j.status === "running");
+        let started = already;
         set({
           studio: {
             ...s,
             queue: s.queue.map((j) => {
-              if (j.status === "cancelled") return j;
+              if (j.status === "cancelled" || j.status === "complete") return j;
               if (!started && (j.status === "held" || j.status === "queued" || j.status === "paused")) {
                 started = true;
-                return { ...j, status: "running" as const, progress: 8 };
+                return { ...j, status: "running" as const, progress: Math.max(j.progress, 8) };
               }
-              if (j.status === "held") return { ...j, status: "queued" as const };
+              if (!already && j.status === "held") return { ...j, status: "queued" as const };
               return j;
             }),
           },
         });
+      },
+      tickQueue: () => {
+        const s = get().studio;
+        if (s.queue.length === 0) return;
+        let queue = s.queue.map((j) => {
+          if (j.status !== "running") return j;
+          const progress = Math.min(100, j.progress + 9);
+          if (progress >= 100) return { ...j, status: "complete" as const, progress: 100 };
+          return { ...j, progress };
+        });
+        if (!queue.some((j) => j.status === "running")) {
+          const next = queue.find((j) => j.status === "queued");
+          if (next) {
+            queue = queue.map((j) =>
+              j.id === next.id ? { ...j, status: "running" as const, progress: Math.max(j.progress, 8) } : j,
+            );
+          }
+        }
+        set({ studio: { ...s, queue } });
       },
       pauseQueue: () => {
         const s = get().studio;
@@ -381,9 +443,8 @@ export const useConsole = create<State>()(
         }),
     }),
     {
-      name: "maestro-console-v190",
+      name: "maestro-console-v191",
       partialize: (s) => ({
-        lastPanel: s.lastPanel,
         advisor: s.advisor,
       }),
       skipHydration: true,

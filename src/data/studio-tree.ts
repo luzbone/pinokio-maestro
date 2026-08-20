@@ -312,3 +312,18 @@ export function resolveModelId(leaf: StudioLeaf, currentId: string): string | nu
   if (models.some((m) => m.id === currentId)) return currentId;
   return leaf.defaultModelId ?? models[0]?.id ?? null;
 }
+
+/** Studio category + sub that actually lists this model. */
+export function studioPathForModel(id: string): {
+  category: StudioCategory;
+  videoSub: VideoSub | null;
+  audioSub: AudioSub | null;
+} | null {
+  const m = MODELS.find((x) => x.id === id);
+  if (!m) return null;
+  if (m.kind === "image") return { category: "image", videoSub: null, audioSub: null };
+  if (m.kind === "video") return { category: "video", videoSub: "frames", audioSub: null };
+  if (m.family === "tts") return { category: "audio", videoSub: null, audioSub: "speech" };
+  if (m.family === "sfx") return { category: "audio", videoSub: null, audioSub: "sfx" };
+  return { category: "audio", videoSub: null, audioSub: "music" };
+}

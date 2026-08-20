@@ -11,8 +11,9 @@ const ITEMS: { id: SectionId; label: string }[] = [
   { id: "cheat", label: "Cheat Sheet" },
 ];
 
-export function FilmNav({ active }: { active: SectionId }) {
-  const setPanel = useConsole((s) => s.setPanel);
+export function FilmNav() {
+  const active = useConsole((s) => s.lastPanel);
+  const lockPanel = useConsole((s) => s.lockPanel);
 
   return (
     <div className="sticky top-0 z-40 border-b border-border bg-bg/92 backdrop-blur-md">
@@ -24,7 +25,7 @@ export function FilmNav({ active }: { active: SectionId }) {
         <a
           href="#top"
           className="shrink-0 font-display text-lg tracking-wide text-gold md:text-xl"
-          onClick={() => setPanel("models")}
+          onClick={() => lockPanel("models")}
         >
           Maestro
           <span className="ml-2 font-mono text-xs uppercase tracking-[0.16em] text-muted">
@@ -36,7 +37,7 @@ export function FilmNav({ active }: { active: SectionId }) {
             <li key={item.id}>
               <a
                 href={`#${item.id}`}
-                onClick={() => setPanel(item.id)}
+                onClick={() => lockPanel(item.id)}
                 aria-current={active === item.id ? "location" : undefined}
                 className={cn(
                   "chip whitespace-nowrap rounded-sm md:px-3",

@@ -63,7 +63,6 @@ export function StudioConsole() {
   const setModel = useConsole((s) => s.setModel);
   const setCategory = useConsole((s) => s.setCategory);
   const enqueue = useConsole((s) => s.enqueue);
-  const cancelJob = useConsole((s) => s.cancelJob);
   const inspectorId = useConsole((s) => s.inspectorId);
 
   const category = studio.category ?? "video";
@@ -107,16 +106,14 @@ export function StudioConsole() {
         workflow:
           next === "multi-shot" ? "Multi-Shot" : next === "extend" ? "Extend" : next === "blend" ? "Blend" : "Frames",
       });
-      if (nextModel) setModel(nextModel);
     } else if (category === "audio") {
       setStudio({ audioSub: next as AudioSub });
-      if (nextModel) setModel(nextModel);
     } else if (category === "edit") {
       setStudio({ editSub: next as EditSub });
-      if (nextModel) setModel(nextModel);
     } else if (category === "tools") {
       setStudio({ toolsSub: next as ToolsSub });
     }
+    if (nextModel && nextModel !== studio.modelId) setModel(nextModel);
   };
 
   const listed = [...leaf.primary, ...leaf.advanced, ...extraIds(leaf, family)]
@@ -415,13 +412,13 @@ function PrimaryPane({ leaf, has }: { leaf: StudioLeaf; has: (id: string) => boo
             step={0.4}
             value={studio.duration}
             unit="s"
-            onChange={(duration) =>
-              setStudio({
-                duration,
-                windows: Math.max(1, Math.ceil(duration / (model.maxNativeSec ?? 14.4))),
-              })
-            }
+            onChange={(duration) => setStudio({ duration })}
           />
+          <p className="mt-1 text-xs text-muted">
+            {studio.duration > (model.maxNativeSec ?? 14.4)
+              ? `≈ ${Math.max(1, Math.ceil(studio.duration / (model.maxNativeSec ?? 14.4)))} native passes at this length.`
+              : "Fits in one native pass."}
+          </p>
         </Knob>
       ) : null}
 
@@ -443,21 +440,32 @@ function PrimaryPane({ leaf, has }: { leaf: StudioLeaf; has: (id: string) => boo
           <Refs
             refs={studio.refs}
             onAdd={() => {
-              if (studio.refs.length >= 9) return;
-              const next = VIDEO_INPUTS[studio.refs.length % VIDEO_INPUTS.length];
+              const counts = {
+                image: studio.refs.filter((r) => r.kind === "image").length,
+                video: studio.refs.filter((r) => r.kind === "video").length,
+                audio: studio.refs.filter((r) => r.kind === "audio").length,
+              };
+              const limits = { image: 9, video: 3, audio: 3 };
+              const next = VIDEO_INPUTS.find((slot) => counts[slot.kind] < limits[slot.kind]);
+              if (!next) return;
               setStudio({
                 refs: [
                   ...studio.refs,
-                  { id: `r-${Date.now()}`, kind: next.kind, role: next.role, label: next.role },
+                  { id: `r-${Date.now()}-${next.role}`, kind: next.kind, role: next.role, label: next.role },
                 ],
               });
             }}
             onRole={(id, role) =>
               setStudio({ refs: studio.refs.map((r) => (r.id === id ? { ...r, role } : r)) })
             }
-            onKind={(id, kind) =>
-              setStudio({ refs: studio.refs.map((r) => (r.id === id ? { ...r, kind } : r)) })
-            }
+            onKind={(id, kind) => {
+              const current = studio.refs.find((r) => r.id === id);
+              if (!current || current.kind === kind) return;
+              const count = studio.refs.filter((r) => r.kind === kind).length;
+              const limit = kind === "image" ? 9 : 3;
+              if (count >= limit) return;
+              setStudio({ refs: studio.refs.map((r) => (r.id === id ? { ...r, kind } : r)) });
+            }}
             onRemove={(id) => setStudio({ refs: studio.refs.filter((r) => r.id !== id) })}
           />
         </Knob>
@@ -467,7 +475,10 @@ function PrimaryPane({ leaf, has }: { leaf: StudioLeaf; has: (id: string) => boo
         <Knob controlId="ai-plan" label="Multi-window sequence">
           <Toggle
             on={studio.aiPlan}
-            onChange={(aiPlan) => setStudio({ aiPlan })}
+            onChange={(aiPlan) => {
+              const cap = model.maxNativeSec && !aiPlan ? model.maxNativeSec : 60;
+              setStudio({ aiPlan, duration: Math.min(studio.duration, cap) });
+            }}
             onLabel="On — one prompt per window"
             offLabel="Off — single prompt"
           />
@@ -568,7 +579,11 @@ function AdvancedPane({
             <Knob controlId="resolution" label="Resolution">
               {leaf.category === "image" || leaf.category === "edit" ? (
                 <ChipRow
-                  value={studio.resolution}
+                  value={
+                    ["Auto", "480p", "540p", "720p", "1080p"].includes(studio.resolution)
+                      ? studio.resolution
+                      : "Auto"
+                  }
                   options={["Auto", "480p", "540p", "720p", "1080p"].map((v) => ({
                     value: v,
                     label: v,
@@ -578,11 +593,17 @@ function AdvancedPane({
               ) : (
                 <select
                   className="h-10 w-full rounded-sm border border-border bg-inset px-2 text-sm"
-                  value={studio.resolution}
+                  value={
+                    model.resolutions.includes(studio.resolution)
+                      ? studio.resolution
+                      : (model.resolutions[0] ?? "")
+                  }
                   onChange={(e) => setStudio({ resolution: e.target.value })}
                 >
                   {model.resolutions.map((a) => (
-                    <option key={a}>{a}</option>
+                    <option key={a} value={a}>
+                      {a}
+                    </option>
                   ))}
                 </select>
               )}
@@ -591,7 +612,13 @@ function AdvancedPane({
           {show("aspect") ? (
             <Knob controlId="aspect" label="Aspect ratio">
               <ChipRow
-                value={studio.aspect}
+                value={(() => {
+                  const opts =
+                    leaf.category === "image"
+                      ? ["Auto", "16:9", "9:16", "1:1", "4:3", "3:4"]
+                      : model.aspects;
+                  return opts.includes(studio.aspect) ? studio.aspect : (opts[0] ?? studio.aspect);
+                })()}
                 options={(leaf.category === "image"
                   ? ["Auto", "16:9", "9:16", "1:1", "4:3", "3:4"]
                   : model.aspects
@@ -617,10 +644,17 @@ function AdvancedPane({
           ) : null}
           {show("fps") ? (
             <Knob controlId="fps" label="FPS">
-              <div className="h-10 rounded-sm border border-border bg-inset px-3 leading-10 text-sm">
-                {studio.fps}
-                {family === "h3" ? " · locked" : ""}
-              </div>
+              {family === "h3" ? (
+                <div className="h-10 rounded-sm border border-border bg-inset px-3 leading-10 text-sm">
+                  {studio.fps} · locked
+                </div>
+              ) : (
+                <ChipRow
+                  value={String(studio.fps)}
+                  options={[16, 24, 25, 30].map((v) => ({ value: String(v), label: String(v) }))}
+                  onChange={(fps) => setStudio({ fps: Number(fps) })}
+                />
+              )}
             </Knob>
           ) : null}
         </div>
@@ -854,9 +888,9 @@ function AdvancedPane({
                 value={studio.codec}
                 onChange={(e) => setStudio({ codec: e.target.value })}
               >
-                <option>Default master</option>
-                <option>H.264</option>
-                <option>H.265</option>
+                <option value="Default master">Default master</option>
+                <option value="H.264">H.264</option>
+                <option value="H.265">H.265</option>
               </select>
             </Knob>
           ) : null}
@@ -887,14 +921,14 @@ function QueueBlock() {
   const removeJob = useConsole((s) => s.removeJob);
   const moveJob = useConsole((s) => s.moveJob);
   const cancelJob = useConsole((s) => s.cancelJob);
-  const live = studio.queue.filter((j) => j.status !== "cancelled").length;
+  const live = studio.queue.filter((j) => j.status !== "cancelled" && j.status !== "complete").length;
   return (
     <Knob controlId="queue" label="Generation Queue">
       <p className="mb-2 text-sm text-muted">
         Studio and Director in one place. Held jobs do not appear as blank gallery cards. v1.9.0.
       </p>
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <span className="chip chip-on tabular">{live} items</span>
+        <span className="chip chip-on tabular">{live} live</span>
         <Button
           size="sm"
           onClick={() => {
@@ -932,14 +966,25 @@ function QueueBlock() {
               key={j.id}
               className="flex items-center justify-between gap-3 rounded-sm border border-border bg-inset px-3 py-2 text-sm"
             >
-              <span>
+              <span className="min-w-0 flex-1">
                 <span className="font-mono text-xs uppercase tracking-[0.12em] text-gold">
                   {j.source}
                 </span>{" "}
                 {j.label}
                 <span className="ml-2 font-mono text-xs uppercase tracking-[0.12em] text-muted">
                   {j.status}
+                  {j.status === "running" || (j.progress > 0 && j.status !== "held")
+                    ? ` · ${Math.round(j.progress)}%`
+                    : ""}
                 </span>
+                {j.status === "running" || j.status === "paused" || j.status === "complete" ? (
+                  <span className="mt-1 block h-1 overflow-hidden rounded-full bg-bezel" aria-hidden>
+                    <span
+                      className="block h-full bg-gold transition-[width] duration-300"
+                      style={{ width: `${j.progress}%` }}
+                    />
+                  </span>
+                ) : null}
               </span>
               <span className="flex shrink-0 flex-wrap gap-1">
                 <Button size="sm" variant="ghost" onClick={() => moveJob(j.id, -1)}>
@@ -948,7 +993,7 @@ function QueueBlock() {
                 <Button size="sm" variant="ghost" onClick={() => moveJob(j.id, 1)}>
                   Down
                 </Button>
-                {j.status !== "cancelled" ? (
+                {j.status !== "cancelled" && j.status !== "complete" ? (
                   <Button size="sm" variant="danger" onClick={() => cancelJob(j.id)}>
                     Cancel
                   </Button>
@@ -1040,18 +1085,20 @@ function Range({
   unit: string;
   onChange: (v: number) => void;
 }) {
+  const hi = Math.max(min, max);
+  const clamped = Math.min(hi, Math.max(min, value));
   return (
     <label className="block">
       <span className="mb-1 block font-mono text-xs tabular text-gold">
-        {value}
+        {clamped}
         {unit}
       </span>
       <input
         type="range"
         min={min}
-        max={max}
+        max={hi}
         step={step}
-        value={value}
+        value={clamped}
         onChange={(e) => onChange(Number(e.target.value))}
         className="w-full accent-gold"
       />
@@ -1105,19 +1152,27 @@ function Refs({
                 onChange={(e) => onRole(r.id, e.target.value)}
               >
                 {VIDEO_INPUTS.map((slot) => (
-                  <option key={slot.role}>{slot.role}</option>
+                  <option key={slot.role} value={slot.role}>
+                    {slot.role}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
         ))}
-        <button
-          type="button"
-          onClick={onAdd}
-          className="rounded-sm border border-dashed border-border px-3 py-4 text-sm text-muted hover:border-gold hover:text-gold"
-        >
-          Add Frame / Soundtrack / Control / Voice
-        </button>
+        {images < 9 || videos < 3 || audio < 3 ? (
+          <button
+            type="button"
+            onClick={onAdd}
+            className="rounded-sm border border-dashed border-border px-3 py-4 text-sm text-muted hover:border-gold hover:text-gold"
+          >
+            Add Frame / Soundtrack / Control / Voice
+          </button>
+        ) : (
+          <p className="rounded-sm border border-dashed border-border px-3 py-4 text-center text-sm text-muted">
+            Ref budget full (9 / 3 / 3).
+          </p>
+        )}
       </div>
     </div>
   );

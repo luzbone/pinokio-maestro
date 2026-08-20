@@ -3,10 +3,13 @@ import { asset } from "@/lib/asset";
 import { useConsole } from "@/store/console-store";
 
 export function Hero() {
-  const setPanel = useConsole((s) => s.setPanel);
+  const lockPanel = useConsole((s) => s.lockPanel);
 
   const go = (id: "studio" | "director" | "hardware") => {
-    setPanel(id);
+    lockPanel(id);
+    if (window.location.hash !== `#${id}`) {
+      window.history.replaceState(null, "", `#${id}`);
+    }
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 

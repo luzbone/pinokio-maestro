@@ -162,6 +162,12 @@
     border-color: var(--color-gold-bright);
     color: var(--color-ink);
   }
+
+  .chip:disabled,
+  .chip-on:disabled {
+    opacity: 0.45;
+    pointer-events: none;
+  }
 }
 
 .film-grain {

@@ -18,9 +18,8 @@ const GOALS: GoalId[] = ["talking", "music-video", "stills", "long-sequence", "l
 export function ModelsGallery() {
   const [goal, setGoal] = useState<GoalId | "all">("all");
   const [open, setOpen] = useState<string | null>(null);
-  const setModel = useConsole((s) => s.setModel);
-  const setMode = useConsole((s) => s.setMode);
-  const setPanel = useConsole((s) => s.setPanel);
+  const loadStudioModel = useConsole((s) => s.loadStudioModel);
+  const lockPanel = useConsole((s) => s.lockPanel);
 
   const filtered = useMemo(() => {
     if (goal === "all") return MODELS;
@@ -28,9 +27,11 @@ export function ModelsGallery() {
   }, [goal]);
 
   const enter = (m: StudioModel) => {
-    setMode(m.kind);
-    setModel(m.id);
-    setPanel("studio");
+    loadStudioModel(m.id);
+    lockPanel("studio");
+    if (window.location.hash !== "#studio") {
+      window.history.replaceState(null, "", "#studio");
+    }
     document.getElementById("studio")?.scrollIntoView({ behavior: "smooth" });
   };
 
