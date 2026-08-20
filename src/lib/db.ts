@@ -233,6 +233,7 @@ if (typeof window === "undefined" && dbSource === "pglite") {
   globalBoot.__pgBootstrapPromise__ ??= ensureDbReady().catch((err) => {
     globalBoot.__pgBootstrapPromise__ = undefined;
     console.error("[db] PGLite bootstrap failed:", err);
-    throw err;
+    // Don't crash the isolate: Cloudflare Workers / missing WASM must not 500
+    // the public site. Auth/DB routes can still fail on first query.
   });
 }

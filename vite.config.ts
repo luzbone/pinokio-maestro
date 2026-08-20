@@ -4,6 +4,7 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
+import { cloudflare } from "@cloudflare/vite-plugin";
 // @ts-expect-error JS plugin alongside the TS vite config
 import { grokPwaPlugin } from "./scripts/grok-pwa-plugin.mjs";
 
@@ -126,11 +127,19 @@ function authPopupPlugin(): Plugin {
 const githubPages = process.env.GITHUB_PAGES === "true";
 const pagesRepo = process.env.GITHUB_REPOSITORY?.split("/")[1] ?? "pinokio-maestro";
 const pagesBase = process.env.VITE_BASE || `/${pagesRepo}/`;
+// Workers Builds injects WORKERS_CI=1. Local `npm run build:cf` / `npm run deploy`
+// set npm_lifecycle_event. CLOUDFLARE=1 remains as a manual override.
+const isCloudflare =
+  process.env.WORKERS_CI === "1" ||
+  process.env.CLOUDFLARE === "1" ||
+  process.env.npm_lifecycle_event === "build:cf" ||
+  process.env.npm_lifecycle_event === "deploy";
 
 // `0.0.0.0:8080` is the live-preview contract — don't change host/port.
 // Keep `nitro` gated to `build` (the Vercel deploy target): enabled in dev it
 // opens a second dev-server port, which breaks the single-port preview.
 // GitHub Pages is static, so Pages builds skip Nitro and ship an SPA shell.
+// Cloudflare Workers Builds uses the Cloudflare Vite plugin instead of Nitro.
 export default defineConfig(({ command }) => ({
   base: githubPages ? pagesBase : "/",
   server: {
@@ -146,6 +155,9 @@ export default defineConfig(({ command }) => ({
     // PWA head + ?install=1 tutorial page; runs before Start/Nitro.
     grokPwaPlugin(),
     tailwindcss(),
+    ...(command === "build" && isCloudflare
+      ? [cloudflare({ viteEnvironment: { name: "ssr" } })]
+      : []),
     tanstackStart(
       githubPages
         ? {
@@ -156,7 +168,7 @@ export default defineConfig(({ command }) => ({
           }
         : {},
     ),
-    ...(command === "build" && !githubPages
+    ...(command === "build" && !githubPages && !isCloudflare
       ? [
           nitro({
             preset: "vercel",

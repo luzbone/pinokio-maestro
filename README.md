@@ -33,9 +33,23 @@ npm run dev
 
 Then open [http://localhost:8080](http://localhost:8080).
 
+## Cloudflare Workers
+
+Pushes to `main` can also deploy via Workers Builds. Bind any custom domain in the Cloudflare dashboard — do not put it in this repo.
+
+Dashboard settings that match this repo:
+
+| Setting | Value |
+| --- | --- |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+| Preview deploy | `npx wrangler versions upload` |
+
+`wrangler.jsonc` is required. Do not let Wrangler auto-generate config — that path builds a Vercel Nitro bundle and then deploys a TanStack Start Worker, which 500s.
+
 ## GitHub Pages
 
-Pushes to `main` build a static SPA and deploy via GitHub Actions. No extra branch.
+Pushes to `main` also build a static SPA and deploy via GitHub Actions.
 
 Source: **Settings → Pages → GitHub Actions**.
 

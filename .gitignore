@@ -8,11 +8,13 @@ node_modules/
 # build / local tooling
 dist/
 .output/
+.vercel/
 .nitro/
 .vinxi/
 .tanstack/
 .vite/
 .wrangler/
+.wrangler-dry/
 .cache/
 
 # logs / OS
