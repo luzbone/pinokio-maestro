@@ -90,7 +90,7 @@ export const MODELS: StudioModel[] = [
     maestroLabel: "H3 Omni — Pruned",
     blurb:
       "The talking-video and music-video engine. Up to ~9 images, 3 videos, and 3 audio refs, each with a job: identity, voice, performance, music.",
-    pro: "Ref2VA. Cannot mix First/Last frames with Omni refs in one pass. Performance timeline audio is the exact soundtrack and advances through multi-window; Voice and Style refs stay style-like. Prompt Enhance / Context-IR rewrites free-form input into speaker IDs, silence, and dialogue the transformer can keep.",
+    pro: "Ref2VA. Cannot mix First/Last frames with Omni refs in one pass. Performance timeline audio is the exact soundtrack and advances through multi-window; Voice and Style refs stay style-like. Prompt Enhance / Context-IR rewrites free-form input into speaker IDs, silence, and dialogue the transformer can keep. v1.9.0 keeps requested dialogue languages and visual details from attached frames.",
     pickIf: "You need named people talking, or a singer hitting a specific vocal performance, from local files you already have.",
     motion: "Follows performance and motion refs. Better at acting than at clean hard cuts. For cutty music videos, plan many short windows rather than one 14 s master.",
     audio: "Native 32 kHz stereo. Condition each window on the exact song segment. Do not treat the track as a reusable vibe clip — Maestro v1.8.7 keeps it as the target soundtrack.",
@@ -435,7 +435,7 @@ export const MODELS: StudioModel[] = [
     maestroLabel: "MiniMax-Music3",
     blurb:
       "Full stereo songs, 5 seconds to 5 minutes, two-minute default. Also a Director soundtrack generator beside ACE-Step.",
-    pro: "Duration-aware writer scales lyrics and arrangement to the length you asked for. v1.8.7.1: on Windows, FlashAttention is validated against the live GPU and falls back to SDPA if the wheel has no kernel for that architecture. Long songs plus Full 33B plus LLM is a RAM incident, not a VRAM incident.",
+    pro: "Duration-aware writer scales lyrics and arrangement to the length you asked for. Prompt with official bare section tags — stage directions get sung. v1.9.0 is faster and lighter (optimized Qwen semantic engine, reusable KV caches, accelerated RVQ, safe GPU fallbacks). Director shows live Music3 progress instead of looking idle. Windows still falls back to SDPA when FlashAttention has no kernel for the live GPU. Long songs plus Full 33B plus LLM is a RAM incident, not a VRAM incident.",
     pickIf: "You need an original track for a music video, with sections that can be planned to downbeats.",
     motion: "N/A — but Director will cut picture to this waveform.",
     audio: "Native stereo. This is the song, not an SFX bed.",

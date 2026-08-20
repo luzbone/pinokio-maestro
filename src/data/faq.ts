@@ -69,8 +69,12 @@ export const FAQ = [
     a: "Music3 writes complete stereo songs, 5 s–5 min, two-minute default, duration-aware lyrics — and it is a Director soundtrack option. ACE-Step XL is the quality ACE path; Turbo is the sketch. If you already have a master, use Upload a track and skip both.",
   },
   {
-    q: "What did v1.8.7.1 actually change?",
-    a: "MiniMax-Music3 GPU compatibility. On Windows, FlashAttention could import and then crash because the wheel had no kernel for that GPU. 1.8.7.1 validates the wheel against the live architecture and falls back to SDPA. It also removes the bad wheel from affected legacy Windows runtimes. Creative controls did not change.",
+    q: "What did v1.9.0 actually change?",
+    a: "One Generation Queue for Studio and Director: Add to Queue holds jobs without starting the GPU, then Start / Pause / reorder / remove from the top-bar popover. Unfinished jobs stay out of the gallery. Director projects checkpoint before render and restore through Load Settings. Music3 is faster and uses official section tags. H3 Prompt Enhance keeps dialogue language and attached-frame details. The prompt box grows and has spellcheck. LoRAs sit at the top of Advanced.",
+  },
+  {
+    q: "Generate or Add to Queue?",
+    a: "Generate starts now. Add to Queue holds the complete job so you can stack several prompts, then Start overnight. Studio and Director share that queue and do not run into each other.",
   },
   {
     q: "When is Full 33B a waste?",

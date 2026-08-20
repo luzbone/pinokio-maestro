@@ -1,7 +1,7 @@
 export const OVERVIEW = {
   pinokio:
     "Maestro is typically launched as a Pinokio app. This console stays inside the product.",
-  version: "v1.8.7.1 · August 2026 · 100% local NVIDIA studio",
+  version: "v1.9.0 · August 2026 · 100% local NVIDIA studio",
   cores: [
     {
       name: "Studio",
@@ -33,7 +33,8 @@ export const OVERVIEW = {
       zone: "Main feed",
       items: [
         "Gallery of stills and clips for the active workspace",
-        "Queue and current generate",
+        "Generation Queue — Studio and Director in one popover",
+        "Gallery filters: All / Images / Videos / Audio / Edits / Multi-clip / Favorites",
         "Director dashboard when that core is active",
       ],
     },
@@ -53,6 +54,14 @@ export const OVERVIEW = {
     {
       name: "Workspaces",
       what: "Isolated output directories with a sidebar switcher. Pins and favorites are per workspace. Use them for clients, SFW / Mature, or experiments.",
+    },
+    {
+      name: "Generation Queue",
+      what: "One global Studio + Director queue in the top bar. Add to Queue holds a job without starting the GPU so you can stack overnight work. Pause, reorder, remove. Unfinished jobs stay out of the main gallery. Director projects in the queue own copies of their inputs and run sequentially without colliding with Studio.",
+    },
+    {
+      name: "Director Load Settings",
+      what: "Projects are checkpointed before render. Load Settings restores models, references, prompts, plans, and generation options after a restart.",
     },
     {
       name: "Recipes",

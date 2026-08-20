@@ -102,6 +102,6 @@ export const SAMPLE_RUNS: DashboardRun[] = [
     duration: "22 s · 2 windows",
     clips: 2,
     status: "paused",
-    note: "Paused after refresh. Resume — do not re-analyze. Prompt Enhance kept speaker IDs.",
+    note: "Paused after refresh. Resume — do not re-analyze. v1.9.0 Load Settings restores this checkpoint.",
   },
 ];

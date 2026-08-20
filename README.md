@@ -1,6 +1,6 @@
 # Maestro Console
 
-A teaching replica of **Maestro v1.8.7.1** — the local NVIDIA studio that usually runs inside [Pinokio](https://pinokio.computer).
+A teaching replica of **Maestro v1.9.0** — the local NVIDIA studio that usually runs inside [Pinokio](https://pinokio.computer).
 
 This site does **not** generate video, audio, or images. It maps the real Studio tree, names every important control, and explains what each one does.
 
@@ -10,7 +10,7 @@ This site does **not** generate video, audio, or images. It maps the real Studio
 
 - **Models** — H3, LTX, Wan, Hunyuan, Flux, Krea, Music3, ACE-Step, TTS, SFX
 - **Studio** — Image · Video (Frames / Multi-Shot / Extend / Blend) · Audio (Speech / Music / SFX / Mixer) · Edit (Retake / Edit Anything / Outpaint / Repaint / Recast) · Tools (Upscale / Revoice)
-- **Director** — music-video and short-film planning
+- **Director** — music-video and short-film planning, Load Settings, shared Generation Queue
 - **Hardware Advisor** — VRAM / RAM / model fit
 - **Explain** — click any knob for the inspector
 

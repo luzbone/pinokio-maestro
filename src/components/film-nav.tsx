@@ -28,7 +28,7 @@ export function FilmNav({ active }: { active: SectionId }) {
         >
           Maestro
           <span className="ml-2 font-mono text-xs uppercase tracking-[0.16em] text-muted">
-            v1.8.7.1
+            v1.9.0
           </span>
         </a>
         <ul className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto py-1">

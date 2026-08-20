@@ -8,6 +8,7 @@ import {
   SAMPLE_RUNS,
 } from "@/data/director";
 import { MODELS } from "@/data/models";
+import { toast } from "sonner";
 import { useConsole } from "@/store/console-store";
 
 export function DirectorConsole() {
@@ -15,6 +16,7 @@ export function DirectorConsole() {
   const setDirector = useConsole((s) => s.setDirector);
   const plan = useConsole((s) => s.planDirector);
   const reset = useConsole((s) => s.resetDirector);
+  const enqueue = useConsole((s) => s.enqueue);
 
   const video = MODELS.find((m) => m.id === d.videoModel);
   const native = video?.maxNativeSec ?? 14.4;
@@ -27,7 +29,7 @@ export function DirectorConsole() {
         <SectionHeader
           kicker="04 · Director"
           title="One prompt. A planned picture."
-          lede="Setup locks after planning. Click any stage to see what the local LLM is doing, and what you can safely edit."
+          lede="v1.9.0 checkpoints the project before render. Load Settings restores models, refs, prompts, and plans. Held Director jobs share the Generation Queue with Studio."
         />
 
         <div className="bezel overflow-hidden rounded-xl border border-border bg-surface">
@@ -35,11 +37,30 @@ export function DirectorConsole() {
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-gold">
               Director v2 · {d.locked ? "Setup locked" : "Setup open"}
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={plan} disabled={d.locked}>
                 Plan
               </Button>
-              <Button size="sm" variant="secondary" onClick={reset}>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => {
+                  enqueue("hold", "director");
+                  toast("Director project held in the Generation Queue. The replica does not render.");
+                }}
+              >
+                Add to Queue
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() =>
+                  toast("Replica: Load Settings would restore the last checkpointed project from disk.")
+                }
+              >
+                Load Settings
+              </Button>
+              <Button size="sm" variant="ghost" onClick={reset}>
                 Unlock / reset
               </Button>
             </div>
@@ -235,7 +256,7 @@ export function DirectorConsole() {
           <div className="border-t border-border p-4">
             <h3 className="font-display text-2xl text-fg">Dashboard</h3>
             <p className="mt-1 text-base text-fg">
-              Past runs, re-run one clip, repair missing pieces, rejoin, resume after refresh.
+              Past runs, re-run one clip, repair missing pieces, rejoin. v1.9.0: Load Settings restores a checkpointed project — models, references, prompts, plans, and generation options — after a restart. Render jobs own copies of their inputs and run one after another without colliding with Studio.
             </p>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {SAMPLE_RUNS.map((run) => (

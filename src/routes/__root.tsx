@@ -18,7 +18,7 @@ export const Route = createRootRoute({
       {
         name: "description",
         content:
-          "Interactive studio console for Maestro v1.8.7.1 — models, every control, and hardware-aware settings.",
+          "Interactive studio console for Maestro v1.9.0 — models, every control, and hardware-aware settings.",
       },
       { name: "apple-mobile-web-app-title", content: APP_NAME },
       { name: "theme-color", content: "#1A1612" },

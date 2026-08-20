@@ -31,7 +31,8 @@ export type RefSlot = {
 export type QueueJob = {
   id: string;
   label: string;
-  status: "queued" | "running" | "cancelled";
+  source: "studio" | "director";
+  status: "held" | "queued" | "running" | "paused" | "cancelled";
   progress: number;
 };
 
@@ -121,7 +122,11 @@ type State = {
   planDirector: () => void;
   resetDirector: () => void;
   setAdvisor: (patch: Partial<AdvisorInput>) => void;
-  enqueue: () => void;
+  enqueue: (mode?: "run" | "hold", source?: "studio" | "director") => void;
+  startQueue: () => void;
+  pauseQueue: () => void;
+  removeJob: (id: string) => void;
+  moveJob: (id: string, dir: -1 | 1) => void;
   cancelJob: (id: string) => void;
 };
 
@@ -309,16 +314,61 @@ export const useConsole = create<State>()(
         }),
       resetDirector: () => set({ director: initialDirector() }),
       setAdvisor: (patch) => set({ advisor: { ...get().advisor, ...patch } }),
-      enqueue: () => {
+      enqueue: (mode = "run", source = "studio") => {
         const s = get().studio;
         const m = modelById(s.modelId);
         const job: QueueJob = {
           id: `q-${Date.now()}`,
-          label: `${m?.maestroLabel ?? "Job"} · ${s.duration}s replica`,
-          status: "running",
-          progress: 8,
+          label:
+            source === "director"
+              ? "Director project · checkpointed replica"
+              : `${m?.maestroLabel ?? "Job"} · replica`,
+          source,
+          status: mode === "hold" ? "held" : "running",
+          progress: mode === "hold" ? 0 : 8,
         };
-        set({ studio: { ...s, queue: [job, ...s.queue].slice(0, 6) } });
+        set({ studio: { ...s, queue: [job, ...s.queue].slice(0, 8) } });
+      },
+      startQueue: () => {
+        const s = get().studio;
+        let started = false;
+        set({
+          studio: {
+            ...s,
+            queue: s.queue.map((j) => {
+              if (j.status === "cancelled") return j;
+              if (!started && (j.status === "held" || j.status === "queued" || j.status === "paused")) {
+                started = true;
+                return { ...j, status: "running" as const, progress: 8 };
+              }
+              if (j.status === "held") return { ...j, status: "queued" as const };
+              return j;
+            }),
+          },
+        });
+      },
+      pauseQueue: () => {
+        const s = get().studio;
+        set({
+          studio: {
+            ...s,
+            queue: s.queue.map((j) => (j.status === "running" ? { ...j, status: "paused" as const } : j)),
+          },
+        });
+      },
+      removeJob: (id) => {
+        const s = get().studio;
+        set({ studio: { ...s, queue: s.queue.filter((j) => j.id !== id) } });
+      },
+      moveJob: (id, dir) => {
+        const s = get().studio;
+        const i = s.queue.findIndex((j) => j.id === id);
+        const j = i + dir;
+        if (i < 0 || j < 0 || j >= s.queue.length) return;
+        const next = s.queue.slice();
+        const [item] = next.splice(i, 1);
+        next.splice(j, 0, item);
+        set({ studio: { ...s, queue: next } });
       },
       cancelJob: (id) =>
         set({
@@ -331,7 +381,7 @@ export const useConsole = create<State>()(
         }),
     }),
     {
-      name: "maestro-console-v1871",
+      name: "maestro-console-v190",
       partialize: (s) => ({
         lastPanel: s.lastPanel,
         advisor: s.advisor,

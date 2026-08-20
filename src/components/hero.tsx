@@ -26,7 +26,7 @@ export function Hero() {
           </p>
           <h1 className="mt-3 max-w-4xl font-display text-6xl leading-[0.92] text-fg md:text-8xl">
             Maestro
-            <span className="block text-gold">v1.8.7.1</span>
+            <span className="block text-gold">v1.9.0</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-[1.55] text-fg md:text-xl">
             Interactive studio — models, every control, and hardware-aware settings.

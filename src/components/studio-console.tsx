@@ -89,8 +89,13 @@ export function StudioConsole() {
   const has = (id: string) => ids.has(id);
 
   const generate = () => {
-    enqueue();
-    toast("Queued in the replica. This console does not run local models.");
+    enqueue("run");
+    toast("Started in the replica. This console does not run local models.");
+  };
+
+  const hold = () => {
+    enqueue("hold");
+    toast("Added to the Generation Queue. Start when the GPU is free.");
   };
 
   const pickSub = (next: string) => {
@@ -124,7 +129,7 @@ export function StudioConsole() {
         <SectionHeader
           kicker="03 · Studio"
           title="Every important control, clickable."
-          lede="A teaching replica of Studio. Image, Video, Audio, Edit, and Tools — each subcategory has its own Advanced drawer. Click Explain on any control."
+          lede="A teaching replica of Studio v1.9.0. Generate starts now; Add to Queue holds the job. Studio and Director share one Generation Queue. Click Explain on any control."
         />
 
         <div className="bezel overflow-hidden rounded-xl border border-border bg-surface">
@@ -174,15 +179,20 @@ export function StudioConsole() {
                   </select>
                 </Knob>
               ) : null}
-              <Button className="w-full" onClick={generate}>
-                {category === "tools" && sub === "upscale"
-                  ? "Upscale Clip"
-                  : category === "tools" && sub === "revoice"
-                    ? "Revoice"
-                    : category === "audio" && sub === "mixer"
-                      ? "Mix"
-                      : "Generate"}
-              </Button>
+              <div className="flex gap-1.5">
+                <Button className="flex-1" onClick={generate}>
+                  {category === "tools" && sub === "upscale"
+                    ? "Upscale Clip"
+                    : category === "tools" && sub === "revoice"
+                      ? "Revoice"
+                      : category === "audio" && sub === "mixer"
+                        ? "Mix"
+                        : "Generate"}
+                </Button>
+                <Button variant="secondary" className="shrink-0 px-3" onClick={hold}>
+                  Add to Queue
+                </Button>
+              </div>
               {leaf.modelFilter === "none" ? (
                 <p className="text-xs text-muted">
                   Mixer and Tools finish files you already have. They do not start a new generate from a blank prompt.
@@ -480,10 +490,14 @@ function PrimaryPane({ leaf, has }: { leaf: StudioLeaf; has: (id: string) => boo
           <textarea
             value={studio.prompt}
             onChange={(e) => setStudio({ prompt: e.target.value })}
-            rows={5}
+            rows={Math.min(14, Math.max(4, studio.prompt.split("\n").length + 2))}
+            spellCheck
             placeholder={leaf.placeholder}
             className="w-full resize-y rounded-sm border border-border bg-inset p-3 text-sm leading-relaxed"
           />
+          <p className="mt-2 text-xs text-muted">
+            v1.9.0: the live editor grows with the text. Browser spellcheck is on. Prompt Enhance stays attached to this box.
+          </p>
         </Knob>
       ) : null}
 
@@ -515,6 +529,39 @@ function AdvancedPane({
 
   return (
     <>
+      {show("lora") ? (
+        <Knob controlId="lora" label="LoRAs">
+          {studio.loras.length === 0 ? (
+            <p className="text-xs text-muted">No LoRAs on this path. Browse in the real app.</p>
+          ) : (
+            studio.loras.map((l) => (
+              <div key={l.id} className="mb-2">
+                <div className="flex justify-between text-xs text-muted">
+                  <span>{l.name}</span>
+                  <span className="tabular font-mono text-gold">{l.weight.toFixed(2)}</span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={1.2}
+                  step={0.05}
+                  value={l.weight}
+                  onChange={(e) =>
+                    setStudio({
+                      loras: studio.loras.map((x) =>
+                        x.id === l.id ? { ...x, weight: Number(e.target.value) } : x,
+                      ),
+                    })
+                  }
+                  className="mt-1 w-full accent-gold"
+                />
+              </div>
+            ))
+          )}
+          <p className="mt-2 text-xs text-muted">v1.9.0 moved LoRA selection to the top of Advanced.</p>
+        </Knob>
+      ) : null}
+
       {show("resolution") || show("aspect") ? (
         <div className="grid gap-2 sm:grid-cols-2">
           {show("resolution") ? (
@@ -816,38 +863,6 @@ function AdvancedPane({
         </div>
       ) : null}
 
-      {show("lora") ? (
-        <Knob controlId="lora" label="LoRAs">
-          {studio.loras.length === 0 ? (
-            <p className="text-xs text-muted">No LoRAs on this path. Browse in the real app.</p>
-          ) : (
-            studio.loras.map((l) => (
-              <div key={l.id} className="mb-2">
-                <div className="flex justify-between text-xs text-muted">
-                  <span>{l.name}</span>
-                  <span className="tabular font-mono text-gold">{l.weight.toFixed(2)}</span>
-                </div>
-                <input
-                  type="range"
-                  min={0}
-                  max={1.2}
-                  step={0.05}
-                  value={l.weight}
-                  onChange={(e) =>
-                    setStudio({
-                      loras: studio.loras.map((x) =>
-                        x.id === l.id ? { ...x, weight: Number(e.target.value) } : x,
-                      ),
-                    })
-                  }
-                  className="mt-1 w-full accent-gold"
-                />
-              </div>
-            ))
-          )}
-        </Knob>
-      ) : null}
-
       {show("output-count") ? (
         <Knob controlId="output-count" label="Output count">
           <Range
@@ -867,25 +882,50 @@ function AdvancedPane({
 function QueueBlock() {
   const studio = useConsole((s) => s.studio);
   const enqueue = useConsole((s) => s.enqueue);
+  const startQueue = useConsole((s) => s.startQueue);
+  const pauseQueue = useConsole((s) => s.pauseQueue);
+  const removeJob = useConsole((s) => s.removeJob);
+  const moveJob = useConsole((s) => s.moveJob);
   const cancelJob = useConsole((s) => s.cancelJob);
+  const live = studio.queue.filter((j) => j.status !== "cancelled").length;
   return (
-    <Knob controlId="queue" label="Queue / recipes">
-      <div className="flex flex-wrap items-center gap-2">
+    <Knob controlId="queue" label="Generation Queue">
+      <p className="mb-2 text-sm text-muted">
+        Studio and Director in one place. Held jobs do not appear as blank gallery cards. v1.9.0.
+      </p>
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <span className="chip chip-on tabular">{live} items</span>
         <Button
+          size="sm"
           onClick={() => {
-            enqueue();
-            toast("Queued in the replica. This console does not run local models.");
+            startQueue();
+            toast("Replica queue started. No GPU work runs here.");
           }}
         >
-          Queue
+          Start
         </Button>
-        <Button variant="secondary" onClick={() => toast("Recipe stored in this replica only.")}>
+        <Button size="sm" variant="secondary" onClick={pauseQueue}>
+          Pause
+        </Button>
+        <Button
+          size="sm"
+          variant="secondary"
+          onClick={() => {
+            enqueue("hold");
+            toast("Added to queue without starting.");
+          }}
+        >
+          Add to Queue
+        </Button>
+        <Button variant="secondary" size="sm" onClick={() => toast("Recipe stored in this replica only.")}>
           Save Current
         </Button>
       </div>
-      <ul className="mt-3 space-y-2">
+      <ul className="space-y-2">
         {studio.queue.length === 0 ? (
-          <li className="text-sm text-muted">Queue idle.</li>
+          <li className="text-sm text-muted">
+            Queue is empty. Queued Studio generations and held Director projects appear here.
+          </li>
         ) : (
           studio.queue.map((j) => (
             <li
@@ -893,16 +933,30 @@ function QueueBlock() {
               className="flex items-center justify-between gap-3 rounded-sm border border-border bg-inset px-3 py-2 text-sm"
             >
               <span>
+                <span className="font-mono text-xs uppercase tracking-[0.12em] text-gold">
+                  {j.source}
+                </span>{" "}
                 {j.label}
                 <span className="ml-2 font-mono text-xs uppercase tracking-[0.12em] text-muted">
                   {j.status}
                 </span>
               </span>
-              {j.status !== "cancelled" ? (
-                <Button size="sm" variant="danger" onClick={() => cancelJob(j.id)}>
-                  Cancel
+              <span className="flex shrink-0 flex-wrap gap-1">
+                <Button size="sm" variant="ghost" onClick={() => moveJob(j.id, -1)}>
+                  Up
                 </Button>
-              ) : null}
+                <Button size="sm" variant="ghost" onClick={() => moveJob(j.id, 1)}>
+                  Down
+                </Button>
+                {j.status !== "cancelled" ? (
+                  <Button size="sm" variant="danger" onClick={() => cancelJob(j.id)}>
+                    Cancel
+                  </Button>
+                ) : null}
+                <Button size="sm" variant="ghost" onClick={() => removeJob(j.id)}>
+                  Remove
+                </Button>
+              </span>
             </li>
           ))
         )}
