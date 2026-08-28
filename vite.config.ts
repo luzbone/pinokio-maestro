@@ -4,7 +4,6 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import viteReact from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { nitro } from "nitro/vite";
-import { cloudflare } from "@cloudflare/vite-plugin";
 // @ts-expect-error JS plugin alongside the TS vite config
 import { grokPwaPlugin } from "./scripts/grok-pwa-plugin.mjs";
 
@@ -138,8 +137,8 @@ const isCloudflare =
 // `0.0.0.0:8080` is the live-preview contract — don't change host/port.
 // Keep `nitro` gated to `build` (the Vercel deploy target): enabled in dev it
 // opens a second dev-server port, which breaks the single-port preview.
-// GitHub Pages is static, so Pages builds skip Nitro and ship an SPA shell.
-// Cloudflare Workers Builds uses the Cloudflare Vite plugin instead of Nitro.
+// GitHub Pages and Cloudflare Workers both ship a static SPA (no Nitro, no
+// Worker SSR). Worker SSR booted PGLite + Better Auth and 500'd on the custom domain.
 export default defineConfig(({ command }) => ({
   base: githubPages ? pagesBase : "/",
   server: {
@@ -155,11 +154,11 @@ export default defineConfig(({ command }) => ({
     // PWA head + ?install=1 tutorial page; runs before Start/Nitro.
     grokPwaPlugin(),
     tailwindcss(),
-    ...(command === "build" && isCloudflare
-      ? [cloudflare({ viteEnvironment: { name: "ssr" } })]
-      : []),
+    // Assets-only Workers deploys skip the Cloudflare SSR plugin. That plugin
+    // wraps TanStack Start in a Worker that boots PGLite + Better Auth and 500s
+    // on maestro.luzbone.com. GitHub Pages already ships this app as a static SPA.
     tanstackStart(
-      githubPages
+      githubPages || isCloudflare
         ? {
             spa: {
               enabled: true,
