@@ -33,6 +33,7 @@ playwright-report/
 blob-report/
 playwright/.cache/
 coverage/
+screenshots/
 
 # grok / agent local
 .grok/
