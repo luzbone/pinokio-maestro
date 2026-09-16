@@ -6,7 +6,7 @@ const ITEMS: { id: SectionId; label: string }[] = [
   { id: "overview", label: "Overview" },
   { id: "studio", label: "Studio" },
   { id: "director", label: "Director" },
-  { id: "edit", label: "Edit" },
+  { id: "editor", label: "Editor" },
   { id: "hardware", label: "Hardware Advisor" },
   { id: "cheat", label: "Cheat Sheet" },
 ];
@@ -29,7 +29,7 @@ export function FilmNav() {
         >
           Maestro
           <span className="ml-2 font-mono text-xs uppercase tracking-[0.16em] text-muted">
-            v1.9.0
+            v2.2.0
           </span>
         </a>
         <ul className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto py-1">

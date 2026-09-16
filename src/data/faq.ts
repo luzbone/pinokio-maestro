@@ -2,86 +2,98 @@ export const RULES = [
   {
     n: "01",
     title: "Pruned is the default.",
-    body: "H3 Pruned 20B is the recommended checkpoint. Full 33B is a hero-take option on 24 GB+ VRAM and 64 GB RAM. If you cannot see the difference at draft resolution, you wasted the wait.",
+    body: "H3 Pruned 20B is the recommended checkpoint. Full 33B is a hero-take option on 24 GB+ VRAM and 64 GB RAM. Fused 4-Step is a draft. If you cannot see the difference at 768p, you wasted the wait.",
   },
   {
     n: "02",
     title: "H3 thinks in 14.4 seconds.",
-    body: "345 frames at 24 fps is the native window. Longer stories are more windows, not a longer pass. Director prints clip counts after planning so a 40 s scene is not queued as one illegal job.",
+    body: "345 frames at 24 fps is the native window. Longer stories are more windows, not a longer pass. Duration Auto and Director clip counts exist so a 40 s scene is not queued as one illegal job.",
   },
   {
     n: "03",
     title: "Audio is either born here or added later.",
-    body: "H3 and LTX-2.5 write 32 kHz (H3) / synced audio with the picture. Wan, Hunyuan, and most LTX-2.3 jobs do not. Do not run MMAudio on a clip whose native bed you already like.",
+    body: "H3 and LTX-2.5 write audio with the picture. Wan, Hunyuan, Viggle, and most LTX-2.3 jobs do not. Do not run MMAudio on a clip whose native bed you already like.",
   },
   {
     n: "04",
-    title: "If a resolution vanished, it was never on that model.",
-    body: "1080p is listed in Director and on Flux stills, but it is not a universal video size. H3's heavy path is a 1440 short edge. LTX is often megapixel-based. Wan is often 480p / 720p. Auto-Tune will hide what the checkpoint cannot do.",
+    title: "YuE2 is the song default.",
+    body: "v2.2 selects YuE2 3B (48 kHz stereo, noncommercial weights). Music3 and ACE-Step remain. Duration is a ceiling — the song may end earlier. My music training is experimental and wants ~24 GB.",
   },
   {
     n: "05",
     title: "Start frames are cheaper than identity panic.",
-    body: "Lock the face in Flux Klein or Krea Identity Edit, then give that still to First / Last or as an Omni identity ref. Prompt-only Director is legal; continuity is not guaranteed.",
+    body: "Lock the face in Flux Klein or Krea Identity Edit, save a Character, then give that still to First / Last or Omni. Prompt-only Director is legal; continuity is not guaranteed.",
   },
   {
     n: "06",
     title: "Unload the LLM before you generate picture.",
-    body: "Gemma 4 4B unloads after 60 s idle. Don't wait if VRAM is already tight. Director planning and video generation are sequential jobs, not roommates.",
+    body: "Gemma 4 unloads after idle. Don't wait if VRAM is already tight. Qwen3.8 27B will not sit beside Full 33B. Director planning and video generation are sequential jobs, not roommates.",
   },
   {
     n: "07",
-    title: "Turbo, Sol, Cache — in that order of trust.",
-    body: "Turbo LoRA is the daily H3 draft tool (4 / 6 / 8). Sol Engine is RTX 40/50 experimental. First Block Cache is a sticky-motion risk on faces. Turn them off before you rewrite the prompt.",
+    title: "Turbo, PAI, Fused, Sol, Cache — in that order of trust.",
+    body: "Turbo LoRA is the daily H3 draft. PAI 8-step / PDD is next. Fused 4-Step is experimental. Sol is RTX 40/50. First Block Cache is a sticky-motion risk on faces. Turn them off before you rewrite the prompt.",
   },
   {
     n: "08",
-    title: "One LoRA, recommended weight.",
-    body: "The CivitAI guide is printed on the slider for a reason. Two character adapters at 0.9 each is how faces collapse. LTX-2.3 and Wan are the LoRA-rich families; H3 is not.",
+    title: "Studio makes. Editor finishes.",
+    body: "Transform tools (Retake, Prompt Edit, Recast, Viggle) live inside Studio Video. Editor is the timeline: titles, speed, export, and round-trips back to Studio.",
   },
   {
     n: "09",
     title: "OOM: strip, then shrink, then demote.",
-    body: "Unload LLM → drop LoRAs → drop refs → lower resolution → shorten window → disable Sol / Cache → Pruned instead of Full. The recovery banner's headroom drop is the first click, not a shame.",
+    body: "Unload LLM → drop LoRAs → drop refs → lower resolution → shorten window → disable Sol / Cache / DLSS → Pruned instead of Full. The recovery banner's headroom drop is the first click, not a shame.",
   },
   {
     n: "10",
-    title: "Studio is a camera. Director is a producer.",
-    body: "Studio: you own every knob. Director: the local LLM owns the plan; you own the locks (aspect, model, soundtrack) and the Manual edits. Setup locks after planning on purpose.",
+    title: "Studio is a camera. Director is a producer. Editor is a cutter.",
+    body: "Studio: you own every knob. Director: the local LLM owns the plan; you own the locks (aspect, model, soundtrack, Cut Speed) and the Manual edits. Editor: you own the join the audience sees.",
   },
 ];
 
 export const FAQ = [
   {
+    q: "What changed in 2.0–2.2?",
+    a: "2.0 added Editor and rebuilt Studio into Video / Image / Audio (Multi-Shot became References; Tools went away). 2.1 added Viggle Animate, Characters/RefMod, H3 Voice Audio, Face Refiner, Duration Auto, RIFE/DLSS. 2.2 makes YuE2 the default music model, unifies Enhance (now / on generation), and gives Director Clip length + Cut Speed −2…+2. Queue, Load Settings, and recipes still work.",
+  },
+  {
+    q: "Studio or Editor?",
+    a: "Studio when you are making or transforming a shot. Editor when you are cutting a movie: tracks, titles, export. A Director project can open in Editor as separate clips plus the song. Sending an Editor clip to Studio AI returns a new take on the same edit.",
+  },
+  {
+    q: "Frames or References?",
+    a: "Frames is text, first/last stills, soundtrack, or control video (H3 First / Last). References is H3 Omni: named people, scenes, motion, voices. They do not mix in one pass. Multi-Shot is a legacy label for old projects.",
+  },
+  {
+    q: "Viggle or Recast?",
+    a: "Viggle Animate drives a still with a control video (dance, walk). Recast replaces people inside an existing performance with SCAIL-2 while keeping camera and timing. Different jobs.",
+  },
+  {
+    q: "YuE2, Music3, or ACE-Step?",
+    a: "YuE2 3B is the v2.2 default: 48 kHz stereo, Direct generation, optional scores/covers. Weights are noncommercial. Music3 writes 5 s–5 min duration-aware songs. ACE-Step XL is the quality ACE path; Turbo is the sketch. If you already have a master, Upload a track and skip all three.",
+  },
+  {
     q: "Why can't I have a 40-second H3 clip?",
-    a: "Because the native window is ~14.4 s (345 frames at 24 fps). Multi-window continuation, Video Extend (keeps the audiovisual tail), or Director's H3-aware clip split are the ways through. A 40 s duration field is a plan, not a single forward pass.",
+    a: "Because the native window is ~14.4 s (345 frames at 24 fps). Multi-window continuation, Video Extend (keeps the audiovisual tail), or Director's H3-aware clip split are the ways through. Duration Auto is a plan, not a single forward pass.",
   },
   {
     q: "Why did 1080p disappear when I changed models?",
-    a: "That checkpoint never offered it. Director and Flux stills often list 480p / 540p / 720p / 1080p. H3 video is Match Output, a draft class, and a heavy 1440-short-edge — not a generic HD menu. LTX may list megapixels. Wan is often 480p / 720p. The picker is honest.",
+    a: "That checkpoint never offered it. H3 video is Match Output, native 768p, and a heavy 1440-short-edge — plus a Regenerate 2K workflow. LTX may list megapixels. Wan is often 480p / 720p. The picker is honest.",
   },
   {
-    q: "Studio or Director?",
-    a: "Studio when you already know the shot. Director when you have a track or a premise and need a plan: music video (beat-aware) or short film (screenplay). You can still re-run a single Director clip by hand.",
-  },
-  {
-    q: "Music3 or ACE-Step?",
-    a: "Music3 writes complete stereo songs, 5 s–5 min, two-minute default, duration-aware lyrics — and it is a Director soundtrack option. ACE-Step XL is the quality ACE path; Turbo is the sketch. If you already have a master, use Upload a track and skip both.",
-  },
-  {
-    q: "What did v1.9.0 actually change?",
-    a: "One Generation Queue for Studio and Director: Add to Queue holds jobs without starting the GPU, then Start / Pause / reorder / remove from the top-bar popover. Unfinished jobs stay out of the gallery. Director projects checkpoint before render and restore through Load Settings. Music3 is faster and uses official section tags. H3 Prompt Enhance keeps dialogue language and attached-frame details. The prompt box grows and has spellcheck. LoRAs sit at the top of Advanced.",
-  },
-  {
-    q: "Generate or Add to Queue?",
-    a: "Generate starts now. Add to Queue holds the complete job so you can stack several prompts, then Start overnight. Studio and Director share that queue and do not run into each other.",
+    q: "Generate, Add to Queue, or Enhance on generation?",
+    a: "Generate starts now. Add to Queue holds the complete job. Enhance on generation rewrites the prompt when that job's turn arrives, then generates — useful while the GPU is busy. Enhance now is the immediate draft for review.",
   },
   {
     q: "When is Full 33B a waste?",
-    a: "On 6–16 GB VRAM. On 8 s Turbo drafts. On any shot you will retake. On stills. On coverage. On a card that is also holding Gemma. Use Full when the face and the line are the product, the card is 24 GB+, and RAM is 64 GB-class.",
+    a: "On 6–16 GB VRAM. On 8 s Turbo or Fused 4-Step drafts. On any shot you will retake. On stills. On coverage. On a card that is also holding Gemma or Qwen3.8. Use Full when the face and the line are the product, the card is 24 GB+, and RAM is 64 GB-class.",
   },
   {
     q: "Does Auto-Tune replace this advisor?",
-    a: "No. Auto-Tune picks profile, quantization, VAE tiling, and a VRAM safety coefficient from the live GPU. This page is a starting map. LoRAs, refs, resolution, and a still-resident LLM all move the ceiling.",
+    a: "No. Auto-Tune picks profile, quantization, VAE tiling, and a VRAM safety coefficient from the live GPU. This page is a starting map. LoRAs, refs, resolution, DLSS, Viggle control windows, and a still-resident LLM all move the ceiling.",
+  },
+  {
+    q: "Where did Edit Anything and Tools go?",
+    a: "Edit Anything is Prompt Edit under Video → Transform. Upscale is Video or Image → Finish. Revoice is Audio → Process. Film Grain is a Finish workflow, not only an Advanced slider.",
   },
 ];

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { SectionHeader } from "@/components/section-header";
+import { GuideShot } from "@/components/overview-section";
 import { StatusDot } from "@/components/ui/badge";
 import {
   RAM_OPTIONS,
@@ -45,7 +46,13 @@ export function HardwareAdvisor() {
         <SectionHeader
           kicker="06 · Hardware Advisor"
           title="Tell it the card. It names the ceiling."
-          lede="Persists in this browser. Auto-Tune still owns the live profile — this is a starting map, not a guarantee."
+          lede="Persists in this browser. Auto-Tune still owns the live profile — this is a starting map, not a guarantee. YuE2 is the light music default; My music training wants ~24 GB; Qwen3.8 27B is not a roommate of Full 33B."
+        />
+
+        <GuideShot
+          src="/guide/settings-models.jpg"
+          caption="Live Settings · Enabled Models"
+          note="Curated defaults (~32 of 200+). Wan, Hunyuan, extra quants, and Qwen Image Edit stay hidden until you opt in. Storage Manager lives next door."
         />
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
@@ -100,7 +107,7 @@ export function HardwareAdvisor() {
                   </Pick>
                 ))}
               </div>
-              <p className="mt-2 text-xs text-muted">Sol Engine is RTX 40 / 50 only.</p>
+              <p className="mt-2 text-xs text-muted">Sol Engine and DLSS Frame Generation are RTX 40 / 50 only. ×5 DLSS is 50-series.</p>
             </fieldset>
             <fieldset>
               <legend className="font-mono text-xs uppercase tracking-[0.16em] text-gold">
@@ -144,7 +151,7 @@ export function HardwareAdvisor() {
               <span>
                 <span className="text-fg">Director + local LLM will also be running.</span>
                 <span className="mt-1 block text-xs text-muted">
-                  Gemma 4 4B unloads after 60 s idle. Planning still occupies the GPU.
+                    Gemma 4 (~5 GB) unloads after idle. Planning still occupies the GPU. Qwen3.8 27B will not sit beside Full 33B.
                 </span>
               </span>
             </label>

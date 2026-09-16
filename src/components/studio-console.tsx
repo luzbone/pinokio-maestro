@@ -7,19 +7,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MODELS, modelById } from "@/data/models";
 import { controlById } from "@/data/controls";
-import { EDIT_TOOLS } from "@/data/edit";
+import { TRANSFORM_TOOLS } from "@/data/edit";
+import { GuideShot } from "@/components/overview-section";
 import {
   STUDIO_CATEGORIES,
-  STUDIO_SUBS,
+  STUDIO_GROUPS,
   leafOf,
   modelsForFilter,
   resolveModelId,
   type AudioSub,
-  type EditSub,
+  type ImageSub,
   type StudioCategory,
   type StudioLeaf,
   type StudioSub,
-  type ToolsSub,
   type VideoSub,
 } from "@/data/studio-tree";
 import { cn } from "@/lib/cn";
@@ -51,6 +51,7 @@ function extraIds(leaf: StudioLeaf, family: ModelFamily): string[] {
       "injection",
       "audio-driven",
       "v2a",
+      "pai-turbo",
     );
   }
   if (leaf.sub !== "blend") extra.push("v2v");
@@ -69,13 +70,9 @@ export function StudioConsole() {
   const sub =
     category === "video"
       ? (studio.videoSub ?? "frames")
-      : category === "audio"
-        ? (studio.audioSub ?? "speech")
-        : category === "edit"
-          ? (studio.editSub ?? "retake")
-          : category === "tools"
-            ? (studio.toolsSub ?? "upscale")
-            : null;
+      : category === "image"
+        ? (studio.imageSub ?? "generate")
+        : (studio.audioSub ?? "speech");
   const leaf = leafOf(category, sub);
   const models = modelsFor(leaf.modelFilter);
   const resolvedId = resolveModelId(leaf, studio.modelId);
@@ -103,15 +100,12 @@ export function StudioConsole() {
     if (category === "video") {
       setStudio({
         videoSub: next as VideoSub,
-        workflow:
-          next === "multi-shot" ? "Multi-Shot" : next === "extend" ? "Extend" : next === "blend" ? "Blend" : "Frames",
+        workflow: nextLeaf.label,
       });
-    } else if (category === "audio") {
+    } else if (category === "image") {
+      setStudio({ imageSub: next as ImageSub });
+    } else {
       setStudio({ audioSub: next as AudioSub });
-    } else if (category === "edit") {
-      setStudio({ editSub: next as EditSub });
-    } else if (category === "tools") {
-      setStudio({ toolsSub: next as ToolsSub });
     }
     if (nextModel && nextModel !== studio.modelId) setModel(nextModel);
   };
@@ -126,13 +120,41 @@ export function StudioConsole() {
         <SectionHeader
           kicker="03 · Studio"
           title="Every important control, clickable."
-          lede="A teaching replica of Studio v1.9.0. Generate starts now; Add to Queue holds the job. Studio and Director share one Generation Queue. Click Explain on any control."
+          lede="A teaching replica of Studio v2.2. Generate starts now; Add to Queue holds the job. Enhance on generation writes the prompt when the GPU is free. Click Explain on any control."
+        />
+
+        <GuideShot
+          src="/guide/studio-video.jpg"
+          caption="Live Studio · Video workflow"
+          note="Create / Transform / Finish on the left. References is H3 Omni. Prompt Edit is Transform. Film Grain is Finish."
+        />
+        <GuideShot
+          src="/guide/duration.jpg"
+          caption="Live Duration Auto"
+          note="Auto · recommended length, Time / Window modes, presets to 60 minutes. Compact Resolution / Aspect / Duration sit on the generate rail with Enhance, Recipes, and Model Browser."
         />
 
         <div className="bezel overflow-hidden rounded-xl border border-border bg-surface">
+          <div className="flex items-center gap-1 border-b border-border px-3 py-1.5">
+            {(["Director", "Studio", "Editor"] as const).map((tab) => (
+              <span
+                key={tab}
+                className={
+                  tab === "Studio"
+                    ? "rounded-sm bg-gold px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-ink"
+                    : "rounded-sm px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted"
+                }
+              >
+                {tab}
+              </span>
+            ))}
+            <span className="ml-auto hidden font-mono text-[10px] uppercase tracking-[0.14em] text-muted sm:block">
+              Settings · All folders · Queue
+            </span>
+          </div>
           <div className="flex items-center justify-between border-b border-border px-4 py-2">
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-gold">
-              Studio · {leaf.label}
+              Studio · {leaf.group} · {leaf.label}
               {leaf.modelFilter !== "none" ? ` · ${model.maestroLabel}` : ""}
             </p>
             <p className="hidden font-mono text-xs uppercase tracking-[0.14em] text-muted md:block">
@@ -149,18 +171,18 @@ export function StudioConsole() {
                   onChange={(v) => setCategory(v as StudioCategory)}
                 />
               </Knob>
-              {STUDIO_SUBS[category].length ? (
-                <div>
+              {STUDIO_GROUPS[category].map((group) => (
+                <div key={group.label}>
                   <p className="mb-1.5 font-mono text-xs uppercase tracking-[0.14em] text-muted">
-                    {category}
+                    {group.label}
                   </p>
                   <ChipRow
-                    value={sub ?? ""}
-                    options={STUDIO_SUBS[category].map((s) => ({ value: s.id, label: s.label }))}
+                    value={sub}
+                    options={group.items.map((s) => ({ value: s.id, label: s.label }))}
                     onChange={pickSub}
                   />
                 </div>
-              ) : null}
+              ))}
               {models.length ? (
                 <Knob controlId="model" label="Model">
                   <select
@@ -176,15 +198,33 @@ export function StudioConsole() {
                   </select>
                 </Knob>
               ) : null}
+              <div className="flex flex-wrap gap-1.5">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => toast("Replica: Recipes store this console. Nothing is written to disk here.")}
+                >
+                  Recipes
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => toast("Replica: Model Browser lists Enabled Models. Wan / Hunyuan stay opt-in.")}
+                >
+                  Model Browser
+                </Button>
+              </div>
               <div className="flex gap-1.5">
                 <Button className="flex-1" onClick={generate}>
-                  {category === "tools" && sub === "upscale"
-                    ? "Upscale Clip"
-                    : category === "tools" && sub === "revoice"
+                  {leaf.sub === "upscale"
+                    ? "Upscale"
+                    : leaf.sub === "revoice"
                       ? "Revoice"
-                      : category === "audio" && sub === "mixer"
+                      : leaf.sub === "mixer"
                         ? "Mix"
-                        : "Generate"}
+                        : leaf.sub === "film-grain"
+                          ? "Apply grain"
+                          : "Generate"}
                 </Button>
                 <Button variant="secondary" className="shrink-0 px-3" onClick={hold}>
                   Add to Queue
@@ -192,7 +232,7 @@ export function StudioConsole() {
               </div>
               {leaf.modelFilter === "none" ? (
                 <p className="text-xs text-muted">
-                  Mixer and Tools finish files you already have. They do not start a new generate from a blank prompt.
+                  Finish and Process work on files you already have. They do not start a new generate from a blank prompt.
                 </p>
               ) : null}
             </aside>
@@ -218,11 +258,14 @@ export function StudioConsole() {
                   </div>
                 ) : (
                   <p className="px-1 text-sm text-muted">
-                    Tools has no Advanced drawer. Method and source live on the main rail.
+                    This Finish / Process leaf keeps method and source on the main rail. Compact settings still exist — they are just not a full Advanced drawer.
                   </p>
                 )}
                 <QueueBlock />
               </div>
+              <p className="border-t border-border px-4 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted">
+                Replica · no GPU · Auto-Tune would print VRAM here in the live app
+              </p>
             </div>
 
             <div
@@ -237,7 +280,7 @@ export function StudioConsole() {
                 <div className="flex h-full flex-col justify-between px-6 py-7 text-base text-fg">
                   <div>
                     <p className="font-mono text-xs uppercase tracking-[0.18em] text-gold">
-                      {leaf.hasAdvanced ? "Advanced drawer" : "Tools"}
+                      {leaf.hasAdvanced ? "Advanced drawer" : leaf.group}
                     </p>
                     <p className="mt-3 leading-[1.55]">
                       This list is what {leaf.label} currently exposes. Click a name or Explain on a knob.
@@ -289,6 +332,97 @@ function PrimaryPane({ leaf, has }: { leaf: StudioLeaf; has: (id: string) => boo
 
   return (
     <>
+      {(has("resolution") || has("aspect") || has("duration")) && leaf.category === "video" ? (
+        <div className="grid gap-2 sm:grid-cols-3">
+          {has("resolution") ? (
+            <Knob controlId="resolution" label="Resolution">
+              <select
+                className="h-10 w-full rounded-sm border border-border bg-inset px-2 text-sm"
+                value={
+                  model.resolutions.includes(studio.resolution)
+                    ? studio.resolution
+                    : (model.resolutions[0] ?? "")
+                }
+                onChange={(e) => setStudio({ resolution: e.target.value })}
+              >
+                {model.resolutions.map((a) => (
+                  <option key={a} value={a}>
+                    {a}
+                  </option>
+                ))}
+              </select>
+            </Knob>
+          ) : null}
+          {has("aspect") ? (
+            <Knob controlId="aspect" label="Aspect">
+              <ChipRow
+                value={model.aspects.includes(studio.aspect) ? studio.aspect : (model.aspects[0] ?? studio.aspect)}
+                options={model.aspects.map((a) => ({ value: a, label: a }))}
+                onChange={(aspect) => setStudio({ aspect })}
+              />
+            </Knob>
+          ) : null}
+          {has("duration") ? (
+            <Knob controlId="duration" label="Duration">
+              <ChipRow
+                value={studio.durationAuto ? "auto" : "custom"}
+                options={[
+                  { value: "auto", label: "Auto · recommended" },
+                  { value: "custom", label: "Time" },
+                ]}
+                onChange={(v) => setStudio({ durationAuto: v === "auto" })}
+              />
+              {studio.durationAuto ? (
+                <p className="mt-2 text-xs text-muted">
+                  ~{studio.duration}s recommended. Live presets run to 60 minutes. H3 still thinks in ~14.4 s windows.
+                </p>
+              ) : (
+                <Range
+                  min={4}
+                  max={model.maxNativeSec && !studio.aiPlan ? model.maxNativeSec : 60}
+                  step={0.4}
+                  value={studio.duration}
+                  unit="s"
+                  onChange={(duration) => setStudio({ duration })}
+                />
+              )}
+            </Knob>
+          ) : null}
+        </div>
+      ) : has("duration") ? (
+        <Knob controlId="duration" label="Duration">
+          <ChipRow
+            value={studio.durationAuto ? "auto" : "custom"}
+            options={[
+              { value: "auto", label: "Auto · recommended" },
+              { value: "custom", label: "Time" },
+            ]}
+            onChange={(v) => setStudio({ durationAuto: v === "auto" })}
+          />
+          {studio.durationAuto ? (
+            <p className="mt-2 text-xs text-muted">
+              ~{studio.duration}s recommended. Longer becomes more windows, not one illegal pass.
+            </p>
+          ) : (
+            <>
+              <Range
+                min={4}
+                max={model.maxNativeSec && !studio.aiPlan ? model.maxNativeSec : 60}
+                step={0.4}
+                value={studio.duration}
+                unit="s"
+                onChange={(duration) => setStudio({ duration })}
+              />
+              <p className="mt-1 text-xs text-muted">
+                {studio.duration > (model.maxNativeSec ?? 14.4)
+                  ? `≈ ${Math.max(1, Math.ceil(studio.duration / (model.maxNativeSec ?? 14.4)))} native passes at this length.`
+                  : "Fits in one native pass."}
+              </p>
+            </>
+          )}
+        </Knob>
+      ) : null}
+
       {leaf.category === "video" && (has("h3-variant") || has("h3-size")) ? (
         <div className="grid gap-2 sm:grid-cols-2">
           {has("h3-variant") ? (
@@ -404,21 +538,30 @@ function PrimaryPane({ leaf, has }: { leaf: StudioLeaf; has: (id: string) => boo
         </Knob>
       ) : null}
 
-      {has("duration") ? (
-        <Knob controlId="duration" label="Duration">
-          <Range
-            min={4}
-            max={model.maxNativeSec && !studio.aiPlan ? model.maxNativeSec : 60}
-            step={0.4}
-            value={studio.duration}
-            unit="s"
-            onChange={(duration) => setStudio({ duration })}
-          />
-          <p className="mt-1 text-xs text-muted">
-            {studio.duration > (model.maxNativeSec ?? 14.4)
-              ? `≈ ${Math.max(1, Math.ceil(studio.duration / (model.maxNativeSec ?? 14.4)))} native passes at this length.`
-              : "Fits in one native pass."}
-          </p>
+      {has("start-end") ? (
+        <Knob controlId="start-end" label="Start / end frame">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <DropHint text="Start frame — one still, same aspect." />
+            <DropHint text="End frame — optional last still." />
+          </div>
+        </Knob>
+      ) : null}
+
+      {has("soundtrack") ? (
+        <Knob controlId="soundtrack" label="Soundtrack">
+          <DropHint text="Drop the song the picture will follow. Duration Auto can adopt its length." />
+        </Knob>
+      ) : null}
+
+      {has("control-video") ? (
+        <Knob controlId="control-video" label="Control video">
+          <DropHint text="Motion driver. Required for Animate (Viggle). Optional hint on Frames." />
+        </Knob>
+      ) : null}
+
+      {has("characters") ? (
+        <Knob controlId="characters" label="Characters / RefMod">
+          <DropHint text="Named face + voice packs. Portable .maestro.safetensors. Not a start frame." />
         </Knob>
       ) : null}
 
@@ -432,6 +575,9 @@ function PrimaryPane({ leaf, has }: { leaf: StudioLeaf; has: (id: string) => boo
             unit="s"
             onChange={(songDuration) => setStudio({ songDuration })}
           />
+          <p className="mt-1 text-xs text-muted">
+            Ceiling, not a pad. YuE2 may end earlier at a musical cadence.
+          </p>
         </Knob>
       ) : null}
 
@@ -496,6 +642,28 @@ function PrimaryPane({ leaf, has }: { leaf: StudioLeaf; has: (id: string) => boo
         </Knob>
       ) : null}
 
+      {has("enhance-now") || has("prompt-enhance") ? (
+        <Knob controlId="enhance-now" label="Enhance">
+          <div className="flex flex-wrap gap-2">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => toast("Replica: Enhance now would rewrite this prompt for review.")}
+            >
+              Enhance now
+            </Button>
+          </div>
+          <div className="mt-2">
+            <Toggle
+              on={studio.enhanceOnGen}
+              onChange={(enhanceOnGen) => setStudio({ enhanceOnGen })}
+              onLabel="Enhance on generation — rewrite when this job's turn arrives"
+              offLabel="Off — generate the prompt as written"
+            />
+          </div>
+        </Knob>
+      ) : null}
+
       {has("prompt") && leaf.placeholder ? (
         <Knob controlId="prompt" label="Prompt">
           <textarea
@@ -507,14 +675,14 @@ function PrimaryPane({ leaf, has }: { leaf: StudioLeaf; has: (id: string) => boo
             className="w-full resize-y rounded-sm border border-border bg-inset p-3 text-sm leading-relaxed"
           />
           <p className="mt-2 text-xs text-muted">
-            v1.9.0: the live editor grows with the text. Browser spellcheck is on. Prompt Enhance stays attached to this box.
+            The live editor grows with the text. Spellcheck is on. Enhance now / on generation sits on this box.
           </p>
         </Knob>
       ) : null}
 
-      {leaf.category === "edit" ? (
+      {leaf.group === "Transform" ? (
         <p className="text-sm text-muted">
-          {EDIT_TOOLS.find((t) => t.id === leaf.sub)?.when ?? "After a take exists."}
+          {TRANSFORM_TOOLS.find((t) => t.id === leaf.sub)?.when ?? "After a take exists."}
         </p>
       ) : null}
     </>
@@ -569,7 +737,7 @@ function AdvancedPane({
               </div>
             ))
           )}
-          <p className="mt-2 text-xs text-muted">v1.9.0 moved LoRA selection to the top of Advanced.</p>
+          <p className="mt-2 text-xs text-muted">LoRA selection lives at the top of Advanced. Stay in the printed recommended range.</p>
         </Knob>
       ) : null}
 
@@ -577,7 +745,7 @@ function AdvancedPane({
         <div className="grid gap-2 sm:grid-cols-2">
           {show("resolution") ? (
             <Knob controlId="resolution" label="Resolution">
-              {leaf.category === "image" || leaf.category === "edit" ? (
+              {leaf.category === "image" ? (
                 <ChipRow
                   value={
                     ["Auto", "480p", "540p", "720p", "1080p"].includes(studio.resolution)
@@ -615,12 +783,12 @@ function AdvancedPane({
                 value={(() => {
                   const opts =
                     leaf.category === "image"
-                      ? ["Auto", "16:9", "9:16", "1:1", "4:3", "3:4"]
+                      ? ["Auto", "16:9", "9:16", "1:1", "4:3", "3:4", "21:9"]
                       : model.aspects;
                   return opts.includes(studio.aspect) ? studio.aspect : (opts[0] ?? studio.aspect);
                 })()}
                 options={(leaf.category === "image"
-                  ? ["Auto", "16:9", "9:16", "1:1", "4:3", "3:4"]
+                  ? ["Auto", "16:9", "9:16", "1:1", "4:3", "3:4", "21:9"]
                   : model.aspects
                 ).map((a) => ({ value: a, label: a }))}
                 onChange={(aspect) => setStudio({ aspect })}
@@ -909,6 +1077,55 @@ function AdvancedPane({
           />
         </Knob>
       ) : null}
+
+      {show("face-refiner") ? (
+        <Knob controlId="face-refiner" label="Refine faces after generation">
+          <Toggle
+            on={studio.faceRefiner}
+            onChange={(faceRefiner) => setStudio({ faceRefiner })}
+            onLabel="On — up to 5 tracked faces"
+            offLabel="Off"
+          />
+        </Knob>
+      ) : null}
+
+      {show("audio-refine") ? (
+        <Knob controlId="audio-refine" label="Audio refinement extra phase">
+          <Toggle
+            on={studio.audioRefine}
+            onChange={(audioRefine) => setStudio({ audioRefine })}
+            onLabel="On — six extra audio steps"
+            offLabel="Off"
+          />
+        </Knob>
+      ) : null}
+
+      {show("pai-turbo") ? (
+        <Knob controlId="pai-turbo" label="Alibaba PAI / PDD Turbo">
+          <Toggle
+            on={studio.paiTurbo}
+            onChange={(paiTurbo) => setStudio({ paiTurbo })}
+            onLabel="8-step FL2VA / Ref2VA"
+            offLabel="Off"
+          />
+        </Knob>
+      ) : null}
+
+      {show("temporal-upsample") ? (
+        <Knob controlId="temporal-upsample" label="Temporal upsampling">
+          <select
+            className="h-10 w-full rounded-sm border border-border bg-inset px-2 text-sm"
+            value={studio.temporalUpsample}
+            onChange={(e) => setStudio({ temporalUpsample: e.target.value })}
+          >
+            <option value="orig">Original frame rate</option>
+            <option value="rife2">RIFE 4.26 ×2</option>
+            <option value="rife3">RIFE 4.26 ×3</option>
+            <option value="rife4">RIFE 4.26 ×4</option>
+            <option value="dlss2">DLSS Frame Generation ×2</option>
+          </select>
+        </Knob>
+      ) : null}
     </>
   );
 }
@@ -921,11 +1138,13 @@ function QueueBlock() {
   const removeJob = useConsole((s) => s.removeJob);
   const moveJob = useConsole((s) => s.moveJob);
   const cancelJob = useConsole((s) => s.cancelJob);
+  const clearCompleted = useConsole((s) => s.clearCompleted);
   const live = studio.queue.filter((j) => j.status !== "cancelled" && j.status !== "complete").length;
+  const done = studio.queue.filter((j) => j.status === "complete").length;
   return (
     <Knob controlId="queue" label="Generation Queue">
       <p className="mb-2 text-sm text-muted">
-        Studio and Director in one place. Held jobs do not appear as blank gallery cards. v1.9.0.
+        Studio, Director, and Editor export share one queue. Held jobs do not appear as blank gallery cards. Completed jobs collapse into history.
       </p>
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <span className="chip chip-on tabular">{live} live</span>
@@ -954,6 +1173,18 @@ function QueueBlock() {
         <Button variant="secondary" size="sm" onClick={() => toast("Recipe stored in this replica only.")}>
           Save Current
         </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => toast("Replica: View prompts would list completed job prompts.")}
+        >
+          View prompts
+        </Button>
+        {done ? (
+          <Button size="sm" variant="ghost" onClick={clearCompleted}>
+            Clear completed
+          </Button>
+        ) : null}
       </div>
       <ul className="space-y-2">
         {studio.queue.length === 0 ? (

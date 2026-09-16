@@ -5,7 +5,7 @@ import { useConsole } from "@/store/console-store";
 export function Hero() {
   const lockPanel = useConsole((s) => s.lockPanel);
 
-  const go = (id: "studio" | "director" | "hardware") => {
+  const go = (id: "studio" | "director" | "editor" | "hardware") => {
     lockPanel(id);
     if (window.location.hash !== `#${id}`) {
       window.history.replaceState(null, "", `#${id}`);
@@ -29,13 +29,13 @@ export function Hero() {
           </p>
           <h1 className="mt-3 max-w-4xl font-display text-6xl leading-[0.92] text-fg md:text-8xl">
             Maestro
-            <span className="block text-gold">v1.9.0</span>
+            <span className="block text-gold">v2.2.0</span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-[1.55] text-fg md:text-xl">
             Interactive studio — models, every control, and hardware-aware settings.
           </p>
           <p className="mt-3 max-w-xl text-base text-muted">
-            Maestro is typically launched as a Pinokio app. This console stays inside the product.
+            Studio makes the shot. Director plans the film. Editor finishes the movie. This handbook does not generate media.
           </p>
         </div>
         <div className="mt-8 flex flex-wrap gap-3">
@@ -44,6 +44,9 @@ export function Hero() {
           </Button>
           <Button size="lg" variant="secondary" onClick={() => go("director")}>
             Enter Director
+          </Button>
+          <Button size="lg" variant="secondary" onClick={() => go("editor")}>
+            Open Editor
           </Button>
           <Button size="lg" variant="secondary" onClick={() => go("hardware")}>
             Open Hardware Advisor

@@ -4,7 +4,8 @@ export type BadgeId =
   | "fast"
   | "heavy"
   | "audio-native"
-  | "long-form";
+  | "long-form"
+  | "experimental";
 
 export type MediaKind = "video" | "image" | "audio";
 
@@ -14,11 +15,14 @@ export type ModelFamily =
   | "ltx23"
   | "wan"
   | "hunyuan"
+  | "viggle"
+  | "scail"
   | "flux"
   | "krea"
   | "qwen"
   | "music3"
   | "acestep"
+  | "yue2"
   | "tts"
   | "sfx";
 

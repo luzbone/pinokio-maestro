@@ -41,7 +41,7 @@ export function ModelsGallery() {
         <SectionHeader
           kicker="01 · Models"
           title="Pick the engine, then the personality."
-          lede="Three galleries. Each card starts in plain English. Open it for tradeoffs, VRAM, and when the default is a waste."
+          lede="Pick the engines newcomers actually use. Wan, Hunyuan, extra quants, and Qwen Image Edit stay opt-in under Settings → Enabled Models. Qwen3.8 27B is an optional planner — not a roommate of Full 33B."
         />
 
         <div className="mb-10">
@@ -175,11 +175,14 @@ const STILL_CROP: Record<ModelFamily, string> = {
   ltx23: "object-[center_42%]",
   wan: "object-[center_62%]",
   hunyuan: "object-[center_38%]",
+  viggle: "object-[center_55%]",
+  scail: "object-[center_30%]",
   flux: "object-[center_22%]",
   krea: "object-[center_32%]",
   qwen: "object-[right_center]",
   music3: "object-center",
   acestep: "object-[center_72%]",
+  yue2: "object-center",
   tts: "object-left",
   sfx: "object-right",
 };

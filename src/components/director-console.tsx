@@ -3,13 +3,17 @@ import { SectionHeader } from "@/components/section-header";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import {
+  CUT_SPEED_LABELS,
+  DIRECTOR_SKILLS,
   DIRECTOR_STAGES,
   PACING_LABELS,
   SAMPLE_RUNS,
 } from "@/data/director";
 import { MODELS } from "@/data/models";
+import { modelsForFilter } from "@/data/studio-tree";
 import { toast } from "sonner";
 import { useConsole } from "@/store/console-store";
+import { GuideShot } from "@/components/overview-section";
 
 export function DirectorConsole() {
   const d = useConsole((s) => s.director);
@@ -29,13 +33,19 @@ export function DirectorConsole() {
         <SectionHeader
           kicker="04 · Director"
           title="One prompt. A planned picture."
-          lede="v1.9.0 checkpoints the project before render. Load Settings restores models, refs, prompts, and plans. Held Director jobs share the Generation Queue with Studio."
+          lede="v2.2 checkpoints the project before render. YuE2 is the default soundtrack generator. Finished productions open in Editor as separate shot clips plus the song. Held Director jobs share the Generation Queue with Studio."
+        />
+
+        <GuideShot
+          src="/guide/director-skills.jpg"
+          caption="Live Director · skills"
+          note="Music Video and Short Film are live. Video Podcast and Viral Video show Coming Soon — do not hunt for them."
         />
 
         <div className="bezel overflow-hidden rounded-xl border border-border bg-surface">
           <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2">
             <p className="font-mono text-xs uppercase tracking-[0.18em] text-gold">
-              Director v2 · {d.locked ? "Setup locked" : "Setup open"}
+              Director · {d.locked ? "Setup locked" : "Setup open"}
             </p>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" onClick={plan} disabled={d.locked}>
@@ -73,18 +83,21 @@ export function DirectorConsole() {
                   <Chip
                     disabled={d.locked}
                     value={d.skill}
-                    options={[
-                      { value: "music-video", label: "Music Video" },
-                      { value: "short-film", label: "Short Film" },
-                    ]}
+                    options={DIRECTOR_SKILLS.filter((s) => s.live).map((s) => ({
+                      value: s.id,
+                      label: s.label,
+                    }))}
                     onChange={(skill) => setDirector({ skill: skill as typeof d.skill })}
                   />
                   <p className="mt-2 text-xs text-muted">
-                    {d.skill === "music-video"
-                      ? "Automated music video from audio."
-                      : "Dialogue-driven scenes from audio."}
+                    {DIRECTOR_SKILLS.find((s) => s.id === d.skill)?.desc}
                   </p>
-                  <p className="mt-1 text-xs text-muted">Video Podcast and Viral Video — coming soon.</p>
+                  <p className="mt-1 text-xs text-muted">
+                    {DIRECTOR_SKILLS.filter((s) => !s.live)
+                      .map((s) => s.label)
+                      .join(" · ")}{" "}
+                    — coming soon.
+                  </p>
                 </Field>
                 <Field label="Track">
                   <Chip
@@ -92,8 +105,9 @@ export function DirectorConsole() {
                     value={d.soundtrack}
                     options={[
                       { value: "existing", label: "Upload a track" },
-                      { value: "music3", label: "Generate a track · Music3" },
-                      { value: "acestep", label: "Generate a track · ACE-Step" },
+                      { value: "yue2", label: "Generate · YuE2" },
+                      { value: "music3", label: "Generate · Music3" },
+                      { value: "acestep", label: "Generate · ACE-Step" },
                     ]}
                     onChange={(soundtrack) =>
                       setDirector({ soundtrack: soundtrack as typeof d.soundtrack })
@@ -107,6 +121,7 @@ export function DirectorConsole() {
                     options={[
                       { value: "16:9", label: "16:9 Wide" },
                       { value: "9:16", label: "9:16 Portrait" },
+                      { value: "21:9", label: "21:9 Cinema" },
                       { value: "1:1", label: "1:1 Square" },
                       { value: "4:3", label: "4:3 Classic" },
                       { value: "3:4", label: "3:4 Tall" },
@@ -144,9 +159,10 @@ export function DirectorConsole() {
                     value={d.videoModel}
                     onChange={(e) => setDirector({ videoModel: e.target.value })}
                   >
-                    {MODELS.filter((m) => m.kind === "video").map((m) => (
+                    {modelsForFilter("video").map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.maestroLabel}
+                        {m.family === "wan" || m.family === "hunyuan" ? " (opt-in)" : ""}
                       </option>
                     ))}
                   </select>
@@ -182,6 +198,50 @@ export function DirectorConsole() {
                     onChange={(review) => setDirector({ review: review as typeof d.review })}
                   />
                 </Field>
+                <Field label="Clip length">
+                  <Chip
+                    disabled={d.locked}
+                    value={d.clipLength === "auto" ? "auto" : "custom"}
+                    options={[
+                      { value: "auto", label: "Auto" },
+                      { value: "custom", label: "Custom cap" },
+                    ]}
+                    onChange={(v) => setDirector({ clipLength: v === "auto" ? "auto" : 8 })}
+                  />
+                  <p className="mt-1 text-xs text-muted">
+                    Model-aligned. H3 stays on native windows. GPU clip limit in Advanced can raise H3 Ref2VA toward 14.4 s.
+                  </p>
+                </Field>
+                <Field label="GPU clip limit">
+                  <Chip
+                    disabled={d.locked}
+                    value={d.gpuClipLimit ? "on" : "off"}
+                    options={[
+                      { value: "off", label: "Default" },
+                      { value: "on", label: "Raise H3 cap" },
+                    ]}
+                    onChange={(v) => setDirector({ gpuClipLimit: v === "on" })}
+                  />
+                </Field>
+              </div>
+
+              <div className="mt-4">
+                <p className="font-mono text-xs uppercase tracking-[0.16em] text-gold">
+                  Cut Speed
+                </p>
+                <input
+                  type="range"
+                  min={-2}
+                  max={2}
+                  step={1}
+                  value={d.cutSpeed}
+                  disabled={d.locked}
+                  onChange={(e) => setDirector({ cutSpeed: Number(e.target.value) })}
+                  className="mt-2 w-full accent-gold"
+                />
+                <p className="mt-1 text-xs text-muted">
+                  {CUT_SPEED_LABELS.find((c) => c.value === d.cutSpeed)?.label ?? "0 default"}
+                </p>
               </div>
 
               <div className="mt-4">
@@ -268,7 +328,7 @@ export function DirectorConsole() {
           <div className="border-t border-border p-4">
             <h3 className="font-display text-2xl text-fg">Dashboard</h3>
             <p className="mt-1 text-base text-fg">
-              Past runs, re-run one clip, repair missing pieces, rejoin. v1.9.0: Load Settings restores a checkpointed project — models, references, prompts, plans, and generation options — after a restart. Render jobs own copies of their inputs and run one after another without colliding with Studio.
+              Past runs, re-run one clip, repair missing pieces, rejoin. Load Settings restores a checkpointed project after a restart. When a production is done, open it in Editor as separate shot clips plus the soundtrack layer.
             </p>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
               {SAMPLE_RUNS.map((run) => (
@@ -306,6 +366,17 @@ export function DirectorConsole() {
                       }
                     >
                       Repair / rejoin
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => {
+                        useConsole.getState().lockPanel("editor");
+                        document.getElementById("editor")?.scrollIntoView({ behavior: "smooth" });
+                        toast("Replica: this production would open in Editor as shot clips + soundtrack.");
+                      }}
+                    >
+                      Open in Editor
                     </Button>
                   </div>
                 </article>

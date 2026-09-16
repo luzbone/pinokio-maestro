@@ -3,14 +3,23 @@ import { persist } from "zustand/middleware";
 import { MODELS, modelById } from "@/data/models";
 import { DEFAULT_ADVISOR, type AdvisorInput } from "@/data/hardware";
 import type { MediaKind } from "@/data/types";
-import { defaultSub, leafOf, resolveModelId, studioPathForModel, type AudioSub, type EditSub, type StudioCategory, type ToolsSub, type VideoSub } from "@/data/studio-tree";
+import {
+  defaultSub,
+  leafOf,
+  resolveModelId,
+  studioPathForModel,
+  type AudioSub,
+  type ImageSub,
+  type StudioCategory,
+  type VideoSub,
+} from "@/data/studio-tree";
 
 export type SectionId =
   | "models"
   | "overview"
   | "studio"
   | "director"
-  | "edit"
+  | "editor"
   | "hardware"
   | "cheat";
 
@@ -31,7 +40,7 @@ export type RefSlot = {
 export type QueueJob = {
   id: string;
   label: string;
-  source: "studio" | "director";
+  source: "studio" | "director" | "editor";
   status: "held" | "queued" | "running" | "paused" | "cancelled" | "complete";
   progress: number;
 };
@@ -39,9 +48,8 @@ export type QueueJob = {
 type StudioSlice = {
   category: StudioCategory;
   videoSub: VideoSub;
+  imageSub: ImageSub;
   audioSub: AudioSub;
-  editSub: EditSub;
-  toolsSub: ToolsSub;
   advancedOpen: boolean;
   mode: MediaKind;
   modelId: string;
@@ -49,11 +57,13 @@ type StudioSlice = {
   aspect: string;
   resolution: string;
   duration: number;
+  durationAuto: boolean;
   fps: number;
   windows: number;
   overlap: number;
   prompt: string;
   enhance: boolean;
+  enhanceOnGen: boolean;
   negative: string;
   steps: number;
   guidance: number;
@@ -86,11 +96,15 @@ type StudioSlice = {
   retakeEngine: "native" | "legacy";
   upscaleMethod: "flashvsr" | "lanczos";
   speechDuration: number;
+  faceRefiner: boolean;
+  audioRefine: boolean;
+  paiTurbo: boolean;
+  temporalUpsample: string;
 };
 
 type DirectorSlice = {
   skill: "music-video" | "short-film";
-  soundtrack: "existing" | "music3" | "acestep";
+  soundtrack: "existing" | "yue2" | "music3" | "acestep";
   aspect: string;
   resolution: string;
   workflow: string;
@@ -98,6 +112,9 @@ type DirectorSlice = {
   imageModel: string;
   review: "auto" | "manual";
   pacing: number;
+  cutSpeed: number;
+  clipLength: "auto" | number;
+  gpuClipLimit: boolean;
   locked: boolean;
   stage: string;
   plannedDuration: number;
@@ -126,12 +143,13 @@ type State = {
   planDirector: () => void;
   resetDirector: () => void;
   setAdvisor: (patch: Partial<AdvisorInput>) => void;
-  enqueue: (mode?: "run" | "hold", source?: "studio" | "director") => void;
+  enqueue: (mode?: "run" | "hold", source?: "studio" | "director" | "editor") => void;
   startQueue: () => void;
   pauseQueue: () => void;
   removeJob: (id: string) => void;
   moveJob: (id: string, dir: -1 | 1) => void;
   cancelJob: (id: string) => void;
+  clearCompleted: () => void;
 };
 
 const firstOf = (kind: MediaKind) => MODELS.find((m) => m.kind === kind)!;
@@ -155,7 +173,7 @@ const studioFor = (modelId: string): Partial<StudioSlice> => {
     resolution: m.resolutions[0] ?? "Match output",
     duration: m.maxNativeSec ? Math.min(8, m.maxNativeSec) : 8,
     fps: m.nativeFps ?? 24,
-    steps: m.family === "h3" ? 8 : m.family === "ltx25" ? 8 : 28,
+    steps: m.family === "h3" ? 8 : m.family === "ltx25" ? 8 : m.family === "viggle" ? 3 : 28,
     enhance: m.family === "h3",
     turbo: m.family === "h3" && m.variant.includes("Pruned"),
     loras: lorasFor(m.family),
@@ -165,21 +183,22 @@ const studioFor = (modelId: string): Partial<StudioSlice> => {
 const initialStudio = (): StudioSlice => ({
   category: "video",
   videoSub: "frames",
+  imageSub: "generate",
   audioSub: "speech",
-  editSub: "retake",
-  toolsSub: "upscale",
   advancedOpen: true,
   mode: "video",
-  modelId: "h3-omni-pruned",
+  modelId: "h3-fl-pruned",
   workflow: "Frames",
   aspect: "16:9",
   resolution: "Match output",
   duration: 8,
+  durationAuto: true,
   fps: 24,
   windows: 1,
   overlap: 1,
   prompt: "",
   enhance: true,
+  enhanceOnGen: false,
   negative: "",
   steps: 8,
   guidance: 4,
@@ -214,11 +233,15 @@ const initialStudio = (): StudioSlice => ({
   retakeEngine: "native",
   upscaleMethod: "flashvsr",
   speechDuration: 20,
+  faceRefiner: false,
+  audioRefine: false,
+  paiTurbo: false,
+  temporalUpsample: "orig",
 });
 
 const initialDirector = (): DirectorSlice => ({
   skill: "music-video",
-  soundtrack: "music3",
+  soundtrack: "yue2",
   aspect: "16:9",
   resolution: "720p",
   workflow: "Auto",
@@ -226,6 +249,9 @@ const initialDirector = (): DirectorSlice => ({
   imageModel: "krea-identity",
   review: "manual",
   pacing: 50,
+  cutSpeed: 0,
+  clipLength: "auto",
+  gpuClipLimit: false,
   locked: false,
   stage: "analyze",
   plannedDuration: 120,
@@ -275,12 +301,14 @@ export const useConsole = create<State>()(
           path.category === "video" && current.category === "video"
             ? current.videoSub
             : (path.videoSub ?? current.videoSub);
+        const imageSub = path.imageSub ?? current.imageSub;
         const audioSub = path.audioSub ?? current.audioSub;
         set({
           studio: {
             ...current,
             category: path.category,
             videoSub,
+            imageSub,
             audioSub,
             mode: m.kind,
             ...studioFor(id),
@@ -295,28 +323,19 @@ export const useConsole = create<State>()(
         const sub =
           category === "video"
             ? (current.videoSub ?? "frames")
-            : category === "audio"
-              ? (current.audioSub ?? "speech")
-              : category === "edit"
-                ? (current.editSub ?? "retake")
-                : category === "tools"
-                  ? (current.toolsSub ?? "upscale")
-                  : defaultSub(category);
+            : category === "image"
+              ? (current.imageSub ?? "generate")
+              : (current.audioSub ?? "speech");
         const leaf = leafOf(category, sub);
         const nextModel = resolveModelId(leaf, current.modelId);
-        const kind: MediaKind =
-          category === "image" || category === "video" || category === "audio"
-            ? category
-            : (nextModel ? (modelById(nextModel)?.kind ?? current.mode) : current.mode);
         set({
           studio: {
             ...current,
             category,
             videoSub: current.videoSub ?? "frames",
+            imageSub: current.imageSub ?? "generate",
             audioSub: current.audioSub ?? "speech",
-            editSub: current.editSub ?? "retake",
-            toolsSub: current.toolsSub ?? "upscale",
-            mode: kind,
+            mode: category,
             ...(nextModel ? studioFor(nextModel) : {}),
             queue: current.queue,
           },
@@ -341,7 +360,13 @@ export const useConsole = create<State>()(
         const next = { ...d, ...patch };
         if (!d.locked && "soundtrack" in patch && !("plannedDuration" in patch)) {
           next.plannedDuration =
-            patch.soundtrack === "acestep" ? 90 : patch.soundtrack === "music3" ? 120 : next.plannedDuration;
+            patch.soundtrack === "acestep"
+              ? 90
+              : patch.soundtrack === "music3"
+                ? 120
+                : patch.soundtrack === "yue2"
+                  ? 120
+                  : next.plannedDuration;
         }
         set({ director: next });
       },
@@ -364,7 +389,9 @@ export const useConsole = create<State>()(
           label:
             source === "director"
               ? "Director project · checkpointed replica"
-              : `${m?.maestroLabel ?? "Job"} · replica`,
+              : source === "editor"
+                ? "Editor export · replica"
+                : `${m?.maestroLabel ?? "Job"} · replica`,
           source,
           status: mode === "hold" ? "held" : busy ? "queued" : "running",
           progress: mode === "hold" || busy ? 0 : 8,
@@ -441,9 +468,18 @@ export const useConsole = create<State>()(
             ),
           },
         }),
+      clearCompleted: () => {
+        const s = get().studio;
+        set({
+          studio: {
+            ...s,
+            queue: s.queue.filter((j) => j.status !== "complete" && j.status !== "cancelled"),
+          },
+        });
+      },
     }),
     {
-      name: "maestro-console-v191",
+      name: "maestro-console-v220",
       partialize: (s) => ({
         advisor: s.advisor,
       }),

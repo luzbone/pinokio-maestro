@@ -35,8 +35,9 @@ export function CheatSheet() {
         </div>
         <footer className="mt-16 border-t border-border pt-8 text-base text-muted">
           <p>
-            Teaching replica of Maestro v1.9.0 (Blizaine). Not affiliated. Labels marked
+            Teaching replica of Maestro v2.2.0 (Blizaine). Not affiliated. Labels marked
             “typical Studio control” describe function when the exact UI string may differ.
+            YuE2 weights are noncommercial.
           </p>
         </footer>
       </div>

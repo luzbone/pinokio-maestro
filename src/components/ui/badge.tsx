@@ -9,6 +9,7 @@ const tone: Record<BadgeId, string> = {
   heavy: "bg-pro-bg text-pro",
   "audio-native": "bg-audio-bg text-audio",
   "long-form": "bg-long-bg text-muted",
+  experimental: "bg-warn-bg text-warn",
 };
 
 export function Badge({ id, className }: { id: BadgeId; className?: string }) {

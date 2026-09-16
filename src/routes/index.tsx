@@ -18,7 +18,7 @@ const SECTIONS: SectionId[] = [
   "overview",
   "studio",
   "director",
-  "edit",
+  "editor",
   "hardware",
   "cheat",
 ];
