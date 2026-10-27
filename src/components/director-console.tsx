@@ -10,7 +10,7 @@ import {
   SAMPLE_RUNS,
 } from "@/data/director";
 import { MODELS } from "@/data/models";
-import { modelsForFilter } from "@/data/studio-tree";
+import { directorVideoModels } from "@/data/studio-tree";
 import { toast } from "sonner";
 import { useConsole } from "@/store/console-store";
 import { GuideShot } from "@/components/overview-section";
@@ -33,7 +33,7 @@ export function DirectorConsole() {
         <SectionHeader
           kicker="04 · Director"
           title="One prompt. A planned picture."
-          lede="v2.2 checkpoints the project before render. YuE2 is the default soundtrack generator. Finished productions open in Editor as separate shot clips plus the song. Held Director jobs share the Generation Queue with Studio."
+          lede="v3.2.5 checkpoints the project before render. A new project prefers H3 Fused 4-Step References when that model is enabled. YuE2 is the default soundtrack. Finished productions open in Editor as separate shot clips plus the song. Held Director jobs share the Generation Queue with Studio."
         />
 
         <GuideShot
@@ -159,10 +159,10 @@ export function DirectorConsole() {
                     value={d.videoModel}
                     onChange={(e) => setDirector({ videoModel: e.target.value })}
                   >
-                    {modelsForFilter("video").map((m) => (
+                    {directorVideoModels().map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.maestroLabel}
-                        {m.family === "wan" || m.family === "hunyuan" ? " (opt-in)" : ""}
+                        {m.optIn ? " (opt-in)" : ""}
                       </option>
                     ))}
                   </select>
@@ -183,6 +183,7 @@ export function DirectorConsole() {
                     {MODELS.filter((m) => m.kind === "image").map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.maestroLabel}
+                        {m.optIn ? " (opt-in)" : ""}
                       </option>
                     ))}
                   </select>

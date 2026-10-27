@@ -245,7 +245,7 @@ const initialDirector = (): DirectorSlice => ({
   aspect: "16:9",
   resolution: "720p",
   workflow: "Auto",
-  videoModel: "h3-omni-pruned",
+  videoModel: "h3-fused-omni",
   imageModel: "krea-identity",
   review: "manual",
   pacing: 50,
@@ -479,7 +479,7 @@ export const useConsole = create<State>()(
       },
     }),
     {
-      name: "maestro-console-v220",
+      name: "maestro-console-v325",
       partialize: (s) => ({
         advisor: s.advisor,
       }),

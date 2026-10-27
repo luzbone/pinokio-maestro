@@ -51,8 +51,8 @@ export function HardwareAdvisor() {
 
         <GuideShot
           src="/guide/settings-models.jpg"
-          caption="Live Settings · Enabled Models"
-          note="Curated defaults (~32 of 200+). Wan, Hunyuan, extra quants, and Qwen Image Edit stay hidden until you opt in. Storage Manager lives next door."
+          caption="Live Settings · Performance · Enabled Models"
+          note="Enabled Models is per workflow. Frames starts on H3 Pruned, H3 Fused 4-Step, and LTX-2.5. Wan, Hunyuan, Fish, and FastH3 stay off until you enable them. Storage Manager opens from this tab."
         />
 
         <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">

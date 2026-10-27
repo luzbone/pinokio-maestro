@@ -45,7 +45,7 @@ export function OverviewSection() {
 
         <GuideShot
           src="/guide/header.jpg"
-          caption="Live header · v2.2"
+          caption="Live header · v3.2.5"
           note="Director / Studio / Editor / Settings. Gallery filters and All folders sit to the right of the cores."
           className="max-h-36"
         />

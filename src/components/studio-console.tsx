@@ -120,13 +120,13 @@ export function StudioConsole() {
         <SectionHeader
           kicker="03 · Studio"
           title="Every important control, clickable."
-          lede="A teaching replica of Studio v2.2. Generate starts now; Add to Queue holds the job. Enhance on generation writes the prompt when the GPU is free. Click Explain on any control."
+          lede="A teaching replica of Studio v3.2.5. Generate starts now; Add to Queue holds the job. Enhance on generation writes the prompt when the GPU is free. Click Explain on any control."
         />
 
         <GuideShot
           src="/guide/studio-video.jpg"
           caption="Live Studio · Video workflow"
-          note="Create / Transform / Finish on the left. References is H3 Omni. Prompt Edit is Transform. Film Grain is Finish."
+          note="Create / Transform / Finish on the left. Create includes Frames, References, Avatar, Extend, and Blend. Prompt Edit is Transform. Film Grain is Finish."
         />
         <GuideShot
           src="/guide/duration.jpg"
@@ -193,6 +193,7 @@ export function StudioConsole() {
                     {models.map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.maestroLabel}
+                        {m.optIn ? " (opt-in)" : ""}
                       </option>
                     ))}
                   </select>
@@ -209,7 +210,7 @@ export function StudioConsole() {
                 <Button
                   size="sm"
                   variant="ghost"
-                  onClick={() => toast("Replica: Model Browser lists Enabled Models. Wan / Hunyuan stay opt-in.")}
+                  onClick={() => toast("Replica: Model Browser lists Enabled Models under Settings → Performance. Wan, Hunyuan, Fish, and FastH3 stay opt-in.")}
                 >
                   Model Browser
                 </Button>
@@ -374,7 +375,7 @@ function PrimaryPane({ leaf, has }: { leaf: StudioLeaf; has: (id: string) => boo
               />
               {studio.durationAuto ? (
                 <p className="mt-2 text-xs text-muted">
-                  ~{studio.duration}s recommended. Live presets run to 60 minutes. H3 still thinks in ~14.4 s windows.
+                  ~{studio.duration}s is this replica’s stand-in. Live Auto follows the card: about 5.2 s on 8 GB, about 10.1 s on Fused, about 14.4 s at 12 GB / 720p. Presets run to 60 minutes.
                 </p>
               ) : (
                 <Range

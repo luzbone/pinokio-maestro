@@ -60,7 +60,7 @@ export const EDITOR_FEATURES = [
   },
   {
     name: "Round trip",
-    what: "Send a selected clip to the matching Studio workflow. The finished generate returns as a new take at the same timeline position.",
+    what: "Send a selected clip to the matching Studio workflow. The finished generate returns as a new take at the same timeline position. The inspector still labels the Prompt Edit round-trip Edit Anything.",
   },
   {
     name: "Director handoff",

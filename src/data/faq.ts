@@ -6,8 +6,8 @@ export const RULES = [
   },
   {
     n: "02",
-    title: "H3 thinks in 14.4 seconds.",
-    body: "345 frames at 24 fps is the native window. Longer stories are more windows, not a longer pass. Duration Auto and Director clip counts exist so a 40 s scene is not queued as one illegal job.",
+    title: "Auto picks the H3 length.",
+    body: "14.4 seconds is the 12 GB / 720p recommendation, not every card. Auto starts nearer 5.2 s on an 8 GB class, and nearer 10.1 s for 720p Fused there. Longer stories are more windows, not one illegal pass.",
   },
   {
     n: "03",
@@ -17,7 +17,7 @@ export const RULES = [
   {
     n: "04",
     title: "YuE2 is the song default.",
-    body: "v2.2 selects YuE2 3B (48 kHz stereo, noncommercial weights). Music3 and ACE-Step remain. Duration is a ceiling — the song may end earlier. My music training is experimental and wants ~24 GB.",
+    body: "YuE2 3B is still the first click (48 kHz stereo, noncommercial weights). Music3 and ACE-Step remain. Duration is a ceiling — the song may end earlier. My music training is experimental and wants ~24 GB.",
   },
   {
     n: "05",
@@ -32,7 +32,7 @@ export const RULES = [
   {
     n: "07",
     title: "Turbo, PAI, Fused, Sol, Cache — in that order of trust.",
-    body: "Turbo LoRA is the daily H3 draft. PAI 8-step / PDD is next. Fused 4-Step is experimental. Sol is RTX 40/50. First Block Cache is a sticky-motion risk on faces. Turn them off before you rewrite the prompt.",
+    body: "Turbo LoRA is the daily H3 draft. Fused 4-Step is a Frames first click and no longer labeled Experimental. TaoMate 3-step is an Advanced Frames recipe, not a model card. FastH3 is opt-in and stays off Director. Sol is RTX 40/50.",
   },
   {
     n: "08",
@@ -53,8 +53,8 @@ export const RULES = [
 
 export const FAQ = [
   {
-    q: "What changed in 2.0–2.2?",
-    a: "2.0 added Editor and rebuilt Studio into Video / Image / Audio (Multi-Shot became References; Tools went away). 2.1 added Viggle Animate, Characters/RefMod, H3 Voice Audio, Face Refiner, Duration Auto, RIFE/DLSS. 2.2 makes YuE2 the default music model, unifies Enhance (now / on generation), and gives Director Clip length + Cut Speed −2…+2. Queue, Load Settings, and recipes still work.",
+    q: "What changed through 3.2.5?",
+    a: "Avatar (LongCat) joined Video → Create. Frames first click is H3 Pruned, H3 Fused 4-Step, and LTX-2.5. New Director projects prefer H3 Fused 4-Step References. Flux 3 Klein, MOSS Image, and Qwen Image 2.1 are image defaults. Fish and FastH3 are opt-in. Settings tabs are Performance, Integrations, and Notifications. YuE2 is still the song.",
   },
   {
     q: "Studio or Editor?",
@@ -62,7 +62,7 @@ export const FAQ = [
   },
   {
     q: "Frames or References?",
-    a: "Frames is text, first/last stills, soundtrack, or control video (H3 First / Last). References is H3 Omni: named people, scenes, motion, voices. They do not mix in one pass. Multi-Shot is a legacy label for old projects.",
+    a: "Frames is text, first/last stills, soundtrack, or control video. References is H3 Omni: named people, scenes, motion, voices. Avatar is LongCat: one still plus one or two voice tracks. They do not mix in one pass. Multi-Shot is a legacy label for old projects.",
   },
   {
     q: "Viggle or Recast?",
@@ -70,11 +70,11 @@ export const FAQ = [
   },
   {
     q: "YuE2, Music3, or ACE-Step?",
-    a: "YuE2 3B is the v2.2 default: 48 kHz stereo, Direct generation, optional scores/covers. Weights are noncommercial. Music3 writes 5 s–5 min duration-aware songs. ACE-Step XL is the quality ACE path; Turbo is the sketch. If you already have a master, Upload a track and skip all three.",
+    a: "YuE2 3B is still the default: 48 kHz stereo, Direct generation, optional scores/covers. Weights are noncommercial. Music3 writes 5 s–5 min duration-aware songs. ACE-Step remains, and it is not the first click. If you already have a master, upload the track.",
   },
   {
     q: "Why can't I have a 40-second H3 clip?",
-    a: "Because the native window is ~14.4 s (345 frames at 24 fps). Multi-window continuation, Video Extend (keeps the audiovisual tail), or Director's H3-aware clip split are the ways through. Duration Auto is a plan, not a single forward pass.",
+    a: "Auto follows the card. On a 12 GB machine at 720p the recommendation is about 14.4 s (345 frames at 24 fps). Smaller cards start shorter. Multi-window continuation, Video Extend, or Director’s clip split cover the rest. Allow 30s clips is an experimental single pass, not the Auto default.",
   },
   {
     q: "Why did 1080p disappear when I changed models?",
@@ -94,6 +94,6 @@ export const FAQ = [
   },
   {
     q: "Where did Edit Anything and Tools go?",
-    a: "Edit Anything is Prompt Edit under Video → Transform. Upscale is Video or Image → Finish. Revoice is Audio → Process. Film Grain is a Finish workflow, not only an Advanced slider.",
+    a: "In Studio, Edit Anything is Prompt Edit under Video → Transform. The Editor inspector still labels that round-trip Edit Anything. Upscale is Video or Image → Finish. Revoice is Audio → Process. Film Grain is a Finish workflow. Wan 2.1 and the old Qwen Image Edit card are gone from this handbook: use Wan 2.2 if you enable Wan, and Qwen Image 2.1 for still edits. TaoMate is an Advanced Frames accelerator, not a model.",
   },
 ];

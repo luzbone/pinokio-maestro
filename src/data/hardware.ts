@@ -92,10 +92,10 @@ export function advise(input: AdvisorInput): AdvisorResult {
     if (goal === "stills") return "None required — unload video before stills on ≤12 GB.";
     if (vram <= 8) {
       return talking
-        ? "H3 Pruned 20B + Turbo, 5–8 s, almost no refs — or skip H3 and board in Flux. Fused 4-Step is a draft, not a miracle."
+        ? "H3 Fused 4-Step, short Auto window, almost no refs — or skip video and board in Flux. Pruned at 8 steps is the heavier try."
         : music
-          ? "LTX-2.5 NVFP4 or Distilled at 0.4 MP, short windows. Enable Wan 2.1 in Settings only if that still OOMs."
-          : "Enable Wan 2.1 / 2.2 in Settings, 480p, short clips. No Full 33B. No LTX 2 MP. Skip long Viggle windows.";
+          ? "LTX-2.5 Distilled or NVFP4 at 0.4 MP, short windows. H3 Fused if you need one vocal insert."
+          : "H3 Fused 4-Step or LTX-2.5 Distilled, 480p, short clips. No Full 33B. No LTX 2 MP. Skip long Viggle windows.";
     }
     if (vram <= 12) {
       return talking
@@ -150,7 +150,7 @@ export function advise(input: AdvisorInput): AdvisorResult {
   })();
 
   const window = (() => {
-    if (vram <= 8) return "5–8 s, one window. H3 14.4 s ceiling is theoretical here. Duration Auto is still a plan, not one illegal pass.";
+    if (vram <= 8) return "Auto is about 5.2 s here, or about 10.1 s on the Fused class with 32 GB RAM. One window. 14.4 s is a 12 GB / 720p recommendation, not this card.";
     if (vram <= 12) return talking ? "8–10 s H3 native. Do not multi-window yet. Short Viggle control clips." : "Short LTX windows, locked if VRAM spikes.";
     if (goal === "long-multi" || goal === "music-video" || goal === "short-film") {
       return vram >= 16
@@ -168,7 +168,7 @@ export function advise(input: AdvisorInput): AdvisorResult {
         : "Yes, with an AI plan per window. Director will print H3 clip counts after planning.";
 
   const accel = (() => {
-    const turbo = vram < 24 || bias !== "max" ? "Turbo LoRA on for drafts. Fused 4-Step is the next-faster experimental." : "Turbo off for hero takes. Skip Fused on keepers.";
+    const turbo = vram < 24 || bias !== "max" ? "Turbo LoRA on for drafts. Fused 4-Step is a Frames first click beside Pruned." : "Turbo off for hero takes. Fused is for drafts, not the keeper.";
     const sol = solOk
       ? bias === "safe"
         ? "Sol Engine off (experimental)."
@@ -237,8 +237,8 @@ export function advise(input: AdvisorInput): AdvisorResult {
     name: "Beginner Safe",
     video:
       vram <= 8
-        ? "Enable Wan 2.1 at 480p in Settings, or skip video and board in Flux."
-        : "H3 Pruned 20B + Turbo, or LTX-2.5 Distilled at 0.4 MP. Fused 4-Step only as a draft.",
+        ? "H3 Fused 4-Step on a short Auto window, or LTX-2.5 Distilled at 0.4 MP. Or skip video and board in Flux."
+        : "H3 Pruned or H3 Fused 4-Step, or LTX-2.5 Distilled at 0.4 MP.",
     image: "Flux 2 Klein 9B. One start frame.",
     audio: music ? "YuE2 3B, ≤120 s ceiling." : "H3 native. No Music3, no My music training.",
     resolution: vram <= 12 ? "Lowest listed draft." : "768-class / 0.4 MP.",

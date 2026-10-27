@@ -1,15 +1,15 @@
 export const OVERVIEW = {
   pinokio:
     "Maestro is a Pinokio app: a local NVIDIA studio that makes shots, plans films, and finishes them on a timeline. This handbook maps the real console — it does not generate media.",
-  version: "v2.2.0 · September 2026 · 100% local NVIDIA studio",
+  version: "v3.2.5 · October 2026 · 100% local NVIDIA studio",
   cores: [
     {
       name: "Studio",
-      what: "Make. Video, Image, and Audio. You pick the model, the refs, the windows, the LoRAs. Transform and Finish live here too — Retake, Viggle, Recast, Upscale, Film Grain.",
+      what: "Make. Video, Image, and Audio. Avatar sits with Frames and References. Transform and Finish live here too — Retake, Viggle, Recast, Upscale, Film Grain.",
     },
     {
       name: "Director",
-      what: "Plan. One prompt becomes a music video or a short film: analyze → screenplay → shot plan → start frames → clips → polish → assemble. Finished projects open in Editor as separate shots.",
+      what: "Plan. One prompt becomes a music video or a short film. New projects prefer H3 Fused 4-Step References. Finished projects open in Editor as separate shots.",
     },
     {
       name: "Editor",
@@ -21,7 +21,7 @@ export const OVERVIEW = {
       zone: "Header",
       items: [
         "Director / Studio / Editor switch",
-        "Settings (gear): Appearance, Performance, Enabled Models, Storage, Integrations, Notifications",
+        "Settings: Performance (Appearance, Enabled Models, Storage Manager, Generation Preview), Integrations, Notifications",
         "Gallery filters: All / Images / Videos / Audio / Edits / Multi-clip / Favorites",
         "Search + All folders (browse every workspace without changing where new files land)",
         "Generation Queue badge",
@@ -31,7 +31,7 @@ export const OVERVIEW = {
       zone: "Studio sidecar",
       items: [
         "Video / Image / Audio — Create, Transform, Finish, and Audio Process live in the sidecar",
-        "Video Create: Frames · References · Extend · Blend",
+        "Video Create: Frames · References · Avatar · Extend · Blend",
         "Video Transform: Animate (Viggle) · Retake · Prompt Edit · Outpaint · Repaint · Recast",
         "Video Finish: Upscale · Film Grain",
         "Image: Generate · Inpaint · Outpaint · Upscale",
@@ -44,7 +44,7 @@ export const OVERVIEW = {
         "Models download on first use (often tens of GB). Later runs are fast.",
         "Director needs a local LLM — Gemma 4 (~5 GB) is the default. It unloads after idle.",
         "Mature / NSFW is off. Leave it off unless you opt in under Settings.",
-        "Enabled Models starts curated (~32 of 200+). Wan, Hunyuan, Z-Image, extra quants are opt-in.",
+        "Enabled Models is per workflow under Settings → Performance. Frames starts on H3 Pruned, H3 Fused 4-Step, and LTX-2.5. Wan, Hunyuan, Fish, and FastH3 stay off until you enable them.",
       ],
     },
   ],
@@ -79,6 +79,55 @@ export const OVERVIEW = {
     },
   ],
   whatsNew: [
+    {
+      ver: "3.2.5",
+      date: "24 Oct 2026",
+      points: [
+        "Fish Drama 3 Small, Fish Auto length, and saved speech-writer instructions. Full Fish stays available. Enable Fish under Performance → Enabled Models.",
+        "One imported H3 checkpoint can show in both Frames and References when the file supports both.",
+      ],
+    },
+    {
+      ver: "3.2.0",
+      date: "22 Oct 2026",
+      points: [
+        "FastH3 V2 (Frames text-to-video) and FastH3 OmniRef (needs a reference). Experimental, opt-in, and rejected on the Director route.",
+      ],
+    },
+    {
+      ver: "3.1.0",
+      date: "19 Oct 2026",
+      points: [
+        "MOSS Image 5B SFT joins Image → Generate for captions and layout. Base stays behind Manage models. No reference images.",
+      ],
+    },
+    {
+      ver: "3.0.0",
+      date: "18 Oct 2026",
+      points: [
+        "Manage models is per workflow. Frames defaults: H3 Pruned, H3 Fused 4-Step, LTX-2.5 Distilled. References defaults: H3 Ref2VA Pruned and Fused. Avatar defaults: both LongCat models.",
+        "Flux 3 Klein and Qwen Image 2.1 Turbo. Fish Drama 3 speech. Fused labels drop the word Experimental.",
+        "New Director projects prefer H3 Fused 4-Step References. Use lyrics to guide visuals is off until you turn it on.",
+        "Duration Auto follows the machine. About 5.2 s on an 8 GB class, about 10.1 s for 720p Fused there, about 14.4 s for 720p Fused or Pruned on 12 GB.",
+      ],
+    },
+    {
+      ver: "2.6.0",
+      date: "4 Oct 2026",
+      points: [
+        "Video → Avatar for LongCat. Generation Preview (Fast Frames, Clearer Frames, Live Video) under Performance.",
+        "Duration modes: Auto, Time, and Window. H3 checkpoint import from the Model Browser.",
+      ],
+    },
+    {
+      ver: "2.3.0–2.5.0",
+      date: "20–28 Sep 2026",
+      points: [
+        "Qwen Image 2.1 becomes a real image model (later a curated default). Krea Identity gets Subject and Scene likeness.",
+        "Gallery can send a clip or still into the open sidecar, with a trim on audio. My Music gains Auto and Guided training.",
+        "Enhance review, from the 2.2.4 patch: Generate all N windows with this draft, Retry window N & generate, Edit prompts in Studio, Other options.",
+      ],
+    },
     {
       ver: "2.2.0",
       date: "16 Sep 2026",

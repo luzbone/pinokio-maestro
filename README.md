@@ -1,6 +1,6 @@
 # Maestro Console
 
-A teaching replica of **Maestro v2.2.0** — the local NVIDIA studio that usually runs inside [Pinokio](https://pinokio.computer).
+A teaching replica of **Maestro v3.2.5** — the local NVIDIA studio that usually runs inside [Pinokio](https://pinokio.computer).
 
 This site does **not** generate video, audio, or images. It maps the real Studio tree, names every important control, and explains what each one does.
 
@@ -10,8 +10,8 @@ Upstream app: [Pinokio · Maestro](https://pinokio.co/apps/github-com-blizaine-m
 
 ## What it covers
 
-- **Models** — H3 (Pruned / Full / Fused / VDN / Voice), LTX, Viggle, SCAIL-2, Flux, Krea, YuE2, Music3, ACE-Step, TTS, SFX. Wan, Hunyuan, and Qwen Image Edit are Settings opt-in.
-- **Studio** — Video (Create: Frames / References / Extend / Blend · Transform: Animate, Retake, Prompt Edit, Outpaint, Repaint, Recast · Finish: Upscale / Film Grain) · Image · Audio (Speech / Music / SFX · Process: Mixer / Revoice)
+- **Models** — H3 (Pruned / Full / Fused / VDN / Voice), LTX-2.5, LongCat Avatar, Viggle, SCAIL-2, Flux 2 and Flux 3 Klein, MOSS Image, Krea, Qwen Image 2.1, YuE2, Music3, ACE-Step, TTS, SFX. Wan, Hunyuan, Fish, and FastH3 are Settings opt-in.
+- **Studio** — Video (Create: Frames / References / Avatar / Extend / Blend · Transform: Animate, Retake, Prompt Edit, Outpaint, Repaint, Recast · Finish: Upscale / Film Grain) · Image · Audio (Speech / Music / SFX · Process: Mixer / Revoice)
 - **Director** — Music Video and Short Film planning (Video Podcast / Viral Video coming soon), YuE2 soundtrack, Cut Speed, Load Settings, shared Generation Queue
 - **Editor** — timeline explainer (not a full NLE). Studio makes the shot; Editor finishes the movie
 - **Hardware Advisor** — VRAM / RAM / model fit

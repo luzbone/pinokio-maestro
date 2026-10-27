@@ -29,7 +29,7 @@ export function FilmNav() {
         >
           Maestro
           <span className="ml-2 font-mono text-xs uppercase tracking-[0.16em] text-muted">
-            v2.2.0
+            v3.2.5
           </span>
         </a>
         <ul className="flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto py-1">

@@ -86,12 +86,12 @@ Data is the source of truth. Components consume it. Prefer `src/data/*` over new
 | FAQ / ten rules | `src/data/faq.ts`, `src/components/cheat-sheet.tsx` |
 | VRAM recipes | `src/data/hardware.ts` |
 | Replica state shape | `src/store/console-store.ts` — bump persist `name` if fields changed (`maestro-console-v230` for 2.3.x, etc.) |
-| Director video-model dropdown | Must use `modelsForFilter("video")` (no Viggle/SCAIL). Mark Wan/Hunyuan-class opt-in in the label. |
+| Director video-model dropdown | Must use `directorVideoModels()` (`modelsForFilter("video")` minus `director: false`). That drops Viggle, SCAIL, LongCat, and FastH3. Mark `optIn` in the label. |
 | Music default | Studio Music `defaultModelId`, Director `soundtrack`, Mixer Explain beginner line — keep them aligned |
 
 What’s new accordion: title **What’s new, by version** (no “since \<old\>”). Newest release first. Old-name maps belong **inside that version’s row**, not in page titles.
 
-Guide shots live in `public/guide/`. Recapture from the live app only when chrome moved (header, Studio sidecar, Duration, Director skills, Editor, Settings → Enabled Models). Keep Golden Hour page chrome; shots are the Onyx product.
+Guide shots live in `public/guide/`. Recapture from the live app only when chrome moved (header, Studio sidecar, Duration, Director skills, Editor, Settings → Performance → Enabled Models). Keep Golden Hour page chrome; shots are the Onyx product.
 
 ---
 

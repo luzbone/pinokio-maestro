@@ -20,6 +20,8 @@ export type ModelFamily =
   | "flux"
   | "krea"
   | "qwen"
+  | "moss"
+  | "longcat"
   | "music3"
   | "acestep"
   | "yue2"

@@ -5,6 +5,7 @@ export type StudioCategory = "video" | "image" | "audio";
 export type VideoSub =
   | "frames"
   | "references"
+  | "avatar"
   | "extend"
   | "blend"
   | "animate"
@@ -27,7 +28,7 @@ export type StudioLeaf = {
   group: string;
   hasAdvanced: boolean;
   defaultModelId: string | null;
-  modelFilter: "image" | "video" | "tts" | "music" | "sfx" | "viggle" | "scail" | "none";
+  modelFilter: "image" | "video" | "tts" | "music" | "sfx" | "viggle" | "scail" | "avatar" | "none";
   placeholder: string;
   primary: string[];
   advanced: string[];
@@ -49,6 +50,7 @@ export const STUDIO_GROUPS: Record<
       items: [
         { id: "frames", label: "Frames" },
         { id: "references", label: "References" },
+        { id: "avatar", label: "Avatar" },
         { id: "extend", label: "Extend" },
         { id: "blend", label: "Blend" },
       ],
@@ -176,11 +178,23 @@ export const STUDIO_LEAVES: StudioLeaf[] = [
   },
   {
     category: "video",
+    sub: "avatar",
+    label: "Avatar",
+    group: "Create",
+    hasAdvanced: true,
+    defaultModelId: "longcat-avatar",
+    modelFilter: "avatar",
+    placeholder: "Optional notes for the performance…",
+    primary: ["ref-images", "voice-clone", "prompt"],
+    advanced: ["seed", "steps", "output-count"],
+  },
+  {
+    category: "video",
     sub: "extend",
     label: "Extend",
     group: "Create",
     hasAdvanced: true,
-    defaultModelId: "ltx23",
+    defaultModelId: "ltx25-distilled",
     modelFilter: "video",
     placeholder: "Describe how the take should continue…",
     primary: ["source-clip", "duration", "prompt"],
@@ -438,9 +452,10 @@ export function modelsForFilter(filter: StudioLeaf["modelFilter"]) {
   if (filter === "image") return MODELS.filter((m) => m.kind === "image");
   if (filter === "video") {
     return MODELS.filter(
-      (m) => m.kind === "video" && m.family !== "viggle" && m.family !== "scail",
+      (m) => m.kind === "video" && m.family !== "viggle" && m.family !== "scail" && m.family !== "longcat",
     );
   }
+  if (filter === "avatar") return MODELS.filter((m) => m.family === "longcat");
   if (filter === "viggle") return MODELS.filter((m) => m.family === "viggle");
   if (filter === "scail") return MODELS.filter((m) => m.family === "scail");
   if (filter === "tts") return MODELS.filter((m) => m.family === "tts" || m.id === "h3-voice-audio");
@@ -449,6 +464,10 @@ export function modelsForFilter(filter: StudioLeaf["modelFilter"]) {
   }
   if (filter === "sfx") return MODELS.filter((m) => m.family === "sfx");
   return [];
+}
+
+export function directorVideoModels() {
+  return modelsForFilter("video").filter((m) => m.director !== false);
 }
 
 export function resolveModelId(leaf: StudioLeaf, currentId: string): string | null {
@@ -473,10 +492,15 @@ export function studioPathForModel(id: string): {
   if (m.family === "scail") {
     return { category: "video", videoSub: "recast", imageSub: null, audioSub: null };
   }
+  if (m.family === "longcat") {
+    return { category: "video", videoSub: "avatar", imageSub: null, audioSub: null };
+  }
   if (m.kind === "video") {
-    const videoSub: VideoSub = m.variant.toLowerCase().includes("omni") || m.id.includes("omni")
-      ? "references"
-      : "frames";
+    // References-only cards (Omni, Fused Omni). FastH3 lists Frames and
+    // References; "OmniRef" in the variant must not steal the Frames open.
+    const referencesOnly =
+      m.workflows.includes("References") && !m.workflows.includes("Frames");
+    const videoSub: VideoSub = referencesOnly ? "references" : "frames";
     return { category: "video", videoSub, imageSub: null, audioSub: null };
   }
   if (m.family === "tts" || m.id === "h3-voice-audio") {
